@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#03a9f4"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.bogoslovov.kaloyan.simplecurrencyconvertor.MainActivity">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:textColor="#FFFFFF">
+
+        <Spinner android:id = "@+id/spinner_top"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginBottom="15dp"/>
+
+        <EditText
+            android:id="@+id/edit_text_top"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textSize="24sp"
+            android:ems="8"
+            android:layout_marginBottom="30dp"
+            android:background="#FFFFFF"/>
+
+        <Spinner android:id = "@+id/spinner_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginBottom="15dp"/>
+
+        <EditText
+            android:id="@+id/edit_text_bottom"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textSize="24sp"
+            android:ems="8"
+            android:layout_marginBottom="15dp"
+            android:background="#FFFFFF"/>
+
+        <Button
+            android:id = "@+id/swap_button"
+            android:background="#03a9f4"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="10dp"
+            android:text="Swap"
+            android:textColor="#FFFFFF"
+        />
+
+    </LinearLayout>
+
+</LinearLayout>
