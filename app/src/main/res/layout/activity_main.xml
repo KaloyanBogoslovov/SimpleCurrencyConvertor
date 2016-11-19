@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -15,7 +15,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:textColor="#FFFFFF">
@@ -23,7 +23,7 @@
         <Spinner android:id = "@+id/spinner_top"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginBottom="15dp"/>
+            android:layout_marginBottom="10dp"/>
 
         <EditText
             android:id="@+id/edit_text_top"
@@ -32,13 +32,13 @@
             android:layout_height="50dp"
             android:textSize="24sp"
             android:ems="8"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="20dp"
             android:background="#FFFFFF"/>
 
         <Spinner android:id = "@+id/spinner_bottom"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginBottom="15dp"/>
+            android:layout_marginBottom="10dp"/>
 
         <EditText
             android:id="@+id/edit_text_bottom"
@@ -47,7 +47,7 @@
             android:layout_height="50dp"
             android:textSize="24sp"
             android:ems="8"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="10dp"
             android:background="#FFFFFF"/>
 
         <Button
@@ -56,10 +56,24 @@
             android:layout_width="100dp"
             android:layout_height="50dp"
             android:layout_marginBottom="10dp"
+            android:layout_marginLeft="5dp"
             android:text="Swap"
             android:textColor="#FFFFFF"
         />
 
     </LinearLayout>
 
-</LinearLayout>
+        <TextView
+            android:layout_alignParentBottom="true"
+            android:gravity="right"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="80dp"
+            android:text="Last update: 2016-11-18"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/last_update_text_view"/>
+
+
+</RelativeLayout>

@@ -8,11 +8,15 @@
 
 
     <TextView
-        android:text="Empty for now"
+        android:text="       The exchange rates are updated every time the application is started.\n
+        The app stores the newest data locally, so it can be used without internet connection.\n
+        The application uses data from the European central bank website."
         android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
         android:id="@+id/textView" />
 </LinearLayout>

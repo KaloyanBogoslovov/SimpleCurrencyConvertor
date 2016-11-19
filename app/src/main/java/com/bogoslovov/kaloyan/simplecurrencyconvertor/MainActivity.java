@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBData;
 
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkIfSharedPreferenceExists();
+        initLastUpdateTextField();
         initSpinners();
         initSwapButton();
         initEditTextFields();
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         checkForConnection();
+        initLastUpdateTextField();
         System.out.println("The application started: onStart");
     }
 
@@ -72,37 +75,38 @@ public class MainActivity extends AppCompatActivity {
         if (!sharedPreferences.contains("EUR")) {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString("EUR", "1");
-            editor.putString("JPY", "1");
-            editor.putString("BGN", "1");
-            editor.putString("CZK", "1");
-            editor.putString("DKK", "1");
-            editor.putString("GBP", "1");
-            editor.putString("HUF", "1");
-            editor.putString("USD", "1");
-            editor.putString("PLN", "1");
-            editor.putString("RON", "1");
-            editor.putString("SEK", "1");
-            editor.putString("CHF", "1");
-            editor.putString("NOK", "1");
-            editor.putString("HRK", "1");
-            editor.putString("RUB", "1");
-            editor.putString("TRY", "1");
-            editor.putString("AUD", "1");
-            editor.putString("BRL", "1");
-            editor.putString("CAD", "1");
-            editor.putString("CNY", "1");
-            editor.putString("HKD", "1");
-            editor.putString("IDR", "1");
-            editor.putString("ILS", "1");
-            editor.putString("INR", "1");
-            editor.putString("KRW", "1");
-            editor.putString("MXN", "1");
-            editor.putString("MYR", "1");
-            editor.putString("NZD", "1");
-            editor.putString("PHP", "1");
-            editor.putString("SGD", "1");
-            editor.putString("THB", "1");
-            editor.putString("ZAR", "1");
+            editor.putString("JPY", "116.95");
+            editor.putString("BGN", "1.9558");
+            editor.putString("CZK", "27.035");
+            editor.putString("DKK", "7.4399");
+            editor.putString("GBP", "0.86218");
+            editor.putString("HUF", "309.49");
+            editor.putString("USD", "1.0629");
+            editor.putString("PLN", "4.4429");
+            editor.putString("RON", "4.5150");
+            editor.putString("SEK", "9.8243");
+            editor.putString("CHF", "1.0711");
+            editor.putString("NOK", "9.1038");
+            editor.putString("HRK", "7.5320");
+            editor.putString("RUB", "68.7941");
+            editor.putString("TRY", "3.5798");
+            editor.putString("AUD", "1.4376");
+            editor.putString("BRL", "3.6049");
+            editor.putString("CAD", "1.4365");
+            editor.putString("CNY", "7.3156");
+            editor.putString("HKD", "8.2450");
+            editor.putString("IDR", "14272.09");
+            editor.putString("ILS", "4.1163");
+            editor.putString("INR", "72.2170");
+            editor.putString("KRW", "1250.14");
+            editor.putString("MXN", "21.6968");
+            editor.putString("MYR", "4.6810");
+            editor.putString("NZD", "1.5073");
+            editor.putString("PHP", "52.687");
+            editor.putString("SGD", "1.5107");
+            editor.putString("THB", "37.744");
+            editor.putString("ZAR", "15.2790");
+            editor.putString("date","2016/11/18");
             editor.commit();
         }
     }
@@ -160,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()) {
             new ECBData().execute();
+
         }
 
     }
@@ -209,13 +214,13 @@ public class MainActivity extends AppCompatActivity {
         if (topOrBottom == "top") {
             BigDecimal exchangeRate =convert(topSpinnerValue, bottomSpinnerValue);
             BigDecimal inputValue =  new BigDecimal(editTextTop.getText().toString());
-            BigDecimal result = exchangeRate.multiply(inputValue).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal result = exchangeRate.multiply(inputValue).setScale(3, RoundingMode.HALF_UP);
             editTextBottom.setText(result.toString());
 
         } else {
             BigDecimal exchangeRate =convert(bottomSpinnerValue, topSpinnerValue);
             BigDecimal inputValue = new BigDecimal(editTextBottom.getText().toString());
-            BigDecimal result = exchangeRate.multiply(inputValue).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal result = exchangeRate.multiply(inputValue).setScale(3, RoundingMode.HALF_UP);
             editTextTop.setText(result.toString());
         }
     }
@@ -265,6 +270,12 @@ public class MainActivity extends AppCompatActivity {
         BigDecimal secondValue=new BigDecimal(sharedPref.getString(target,""));
         BigDecimal exchangeRate = secondValue.divide(firstValue,4,RoundingMode.HALF_UP);
         return exchangeRate;
+    }
+
+    private void initLastUpdateTextField(){
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        TextView lastUpdate = (TextView) findViewById(R.id.last_update_text_view);
+        lastUpdate.setText("Last update: "+sharedPref.getString("date",""));
     }
 
 }

@@ -68,9 +68,10 @@ public class ECBData extends AsyncTask<Object, Object, Void> {
 
     public void parseData(BufferedReader br) throws IOException {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("EUR", "1");
         String line = br.readLine();
         String date = line.substring(14, 24);
+        editor.putString("EUR", "1");
+        editor.putString("date",date);
         String remaining;
         String symbol;
         String rate;
@@ -86,4 +87,5 @@ public class ECBData extends AsyncTask<Object, Object, Void> {
         editor.commit();
         br.close();
     }
+
 }
