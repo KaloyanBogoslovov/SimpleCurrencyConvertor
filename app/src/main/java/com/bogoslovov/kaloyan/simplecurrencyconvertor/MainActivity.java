@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,30 +21,29 @@ import android.widget.TextView;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBData;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations.bottomSpinner;
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations.topSpinner;
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBData.sharedPreferences;
 
 public class MainActivity extends AppCompatActivity {
-    String bottomSpinner="";
-    String topSpinner="";
+
+    Calculations calculations = new Calculations(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkIfSharedPreferenceExists();
-        initLastUpdateTextField();
         initSpinners();
         initSwapButton();
         initEditTextFields();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        getSupportActionBar().setElevation(0f);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         checkForConnection();
-        initLastUpdateTextField();
         System.out.println("The application started: onStart");
     }
 
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 if (editTextTop.isFocused()) {
                     if (!editTextTop.getText().toString().equals("")) {
-                        calculate("top");
+                        calculations.calculate("top",topSpinner,bottomSpinner);
                     }
                     System.out.println("bottom listener activated");
                 }
@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 if (editTextBottom.isFocused()) {
                     if (!editTextBottom.getText().toString().equals("")) {
-                        calculate("bottom");
+                        calculations.calculate("bottom",topSpinner,bottomSpinner);
                     }
                     System.out.println("bottom listener activated");
                 }
@@ -163,8 +163,9 @@ public class MainActivity extends AppCompatActivity {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()) {
-            new ECBData().execute();
-
+            new ECBData(this).execute();
+        }else{
+            initLastUpdateTextField();
         }
 
     }
@@ -194,88 +195,25 @@ public class MainActivity extends AppCompatActivity {
         spinnerTop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 topSpinner = spinnerAdapter.getItem(position);
-                calculate("top");
+                calculations.calculate("top",topSpinner,bottomSpinner);
             }
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
         spinnerBottom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 bottomSpinner = spinnerAdapter.getItem(position);
-                calculate("top");
+                calculations.calculate("top",topSpinner,bottomSpinner);
             }
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
     }
-    public void calculate(String topOrBottom) {
-        String topSpinnerValue = getSpinnerValue(topSpinner);
-        String bottomSpinnerValue = getSpinnerValue(bottomSpinner);
-        EditText editTextTop = (EditText) findViewById(R.id.edit_text_top);
-        EditText editTextBottom= (EditText) findViewById(R.id.edit_text_bottom);
-        if (topOrBottom == "top") {
-            BigDecimal exchangeRate =convert(topSpinnerValue, bottomSpinnerValue);
-            BigDecimal inputValue =  new BigDecimal(editTextTop.getText().toString());
-            BigDecimal result = exchangeRate.multiply(inputValue).setScale(3, RoundingMode.HALF_UP);
-            editTextBottom.setText(result.toString());
 
-        } else {
-            BigDecimal exchangeRate =convert(bottomSpinnerValue, topSpinnerValue);
-            BigDecimal inputValue = new BigDecimal(editTextBottom.getText().toString());
-            BigDecimal result = exchangeRate.multiply(inputValue).setScale(3, RoundingMode.HALF_UP);
-            editTextTop.setText(result.toString());
-        }
-    }
-
-    private String getSpinnerValue(String spinner){
-
-        switch (spinner){
-            case"EUR Euro": return "EUR";
-            case"USD US dollar": return "USD";
-            case"JPY Japanese yen": return "JPY";
-            case"BGN Bulgarian lev": return "BGN";
-            case"CZK Czech koruna": return "CZK";
-            case"DKK Danish krone": return "DKK";
-            case"GBP Pound sterling": return "GBP";
-            case"HUF Hungarian forint": return "HUF";
-            case"PLN Polish zloty": return "PLN";
-            case"RON Romanian leu": return "RON";
-            case"SEK Swedish krona": return "SEK";
-            case"CHF Swiss franc": return "CHF";
-            case"NOK Norwegian krone": return "NOK";
-            case"HRK Croatian kuna": return "HRK";
-            case"RUB Russian rouble": return "RUB";
-            case"TRY Turkish lira": return "TRY";
-            case"AUD Australian dollar": return "AUD";
-            case"BRL Brazilian real": return "BRL";
-            case"CAD Canadian dollar": return "CAD";
-            case"CNY Chinese yuan": return "CNY";
-            case"HKD Hong Kong dollar": return "HKD";
-            case"IDR Indonesian rupiah": return "IDR";
-            case"ILS Israeli shekel": return "ILS";
-            case"INR Indian rupee": return "INR";
-            case"KRW South Korean won": return "KRW";
-            case"MXN Mexican peso": return "MXN";
-            case"MYR Malaysian ringgit": return "MYR";
-            case"NZD New Zealand dollar": return "NZD";
-            case"PHP Philippine peso": return "PHP";
-            case"SGD Singapore dollar": return "SGD";
-            case"THB Thai baht": return "THB";
-            case"ZAR South African rand": return "ZAR";
-        }
-        return "EUR";
-    }
-
-    private BigDecimal convert(String key, String target){
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        BigDecimal firstValue=new BigDecimal(sharedPref.getString(key,""));
-        BigDecimal secondValue=new BigDecimal(sharedPref.getString(target,""));
-        BigDecimal exchangeRate = secondValue.divide(firstValue,4,RoundingMode.HALF_UP);
-        return exchangeRate;
-    }
 
     private void initLastUpdateTextField(){
         SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
         TextView lastUpdate = (TextView) findViewById(R.id.last_update_text_view);
-        lastUpdate.setText("Last update: "+sharedPref.getString("date",""));
+        String date = "Last update: "+sharedPref.getString("date","");
+        lastUpdate.setText(date);
     }
 
 }
