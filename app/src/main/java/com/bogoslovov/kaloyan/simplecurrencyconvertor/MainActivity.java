@@ -21,12 +21,14 @@ import android.widget.TextView;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBData;
 
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations.bottomSpinner;
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations.topSpinner;
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBData.sharedPreferences;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static String bottomSpinnerValue ="";
+    public static String topSpinnerValue ="";
+    private static final String TOP_SPINNER = "top";
+    private static final String BOTTOM_SPINNER="bottom";
     Calculations calculations = new Calculations(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 if (editTextTop.isFocused()) {
                     if (!editTextTop.getText().toString().equals("")) {
-                        calculations.calculate("top",topSpinner,bottomSpinner);
+                        calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
                     }
                     System.out.println("bottom listener activated");
                 }
@@ -151,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 if (editTextBottom.isFocused()) {
                     if (!editTextBottom.getText().toString().equals("")) {
-                        calculations.calculate("bottom",topSpinner,bottomSpinner);
+                        calculations.calculate(BOTTOM_SPINNER, topSpinnerValue, bottomSpinnerValue);
                     }
                     System.out.println("bottom listener activated");
                 }
@@ -167,26 +169,11 @@ public class MainActivity extends AppCompatActivity {
         }else{
             initLastUpdateTextField();
         }
-
     }
 
     private void initSpinners(){
-        String [] currencies={"EUR Euro", "USD US dollar", "JPY Japanese yen", "BGN Bulgarian lev", "CZK Czech koruna",
-                "DKK Danish krone", "GBP Pound sterling", "HUF Hungarian forint", "PLN Polish zloty", "RON Romanian leu",
-                "SEK Swedish krona", "CHF Swiss franc", "NOK Norwegian krone", "HRK Croatian kuna", "RUB Russian rouble",
-                "TRY Turkish lira", "AUD Australian dollar", "BRL Brazilian real", "CAD Canadian dollar", "CNY Chinese yuan",
-                "HKD Hong Kong dollar", "IDR Indonesian rupiah", "ILS Israeli shekel", "INR Indian rupee", "KRW South Korean won",
-                "MXN Mexican peso", "MYR Malaysian ringgit","NZD New Zealand dollar", "PHP Philippine peso",
-                "SGD Singapore dollar", "THB Thai baht", "ZAR South African rand"};
-        Integer [] images = {R.drawable.eur,R.drawable.usa,R.drawable.jpy,R.drawable.bgn,R.drawable.czk,
-                R.drawable.dkk,R.drawable.gbp,R.drawable.huf,R.drawable.pln,R.drawable.ron,
-                R.drawable.sek,R.drawable.chf,R.drawable.nok,R.drawable.hrk,R.drawable.rub,
-                R.drawable.tryy,R.drawable.aud,R.drawable.brl,R.drawable.cad,R.drawable.cny,
-                R.drawable.hkd,R.drawable.idr,R.drawable.ils,R.drawable.inr,R.drawable.krw,
-                R.drawable.mxn,R.drawable.myr,R.drawable.nzd,R.drawable.php,
-                R.drawable.sgd,R.drawable.thb,R.drawable.zar};
-
-        final SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, R.layout.spinner_row,currencies,images);
+        Constants constants = new Constants();
+        final SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, R.layout.spinner_row,constants.currencies,constants.images);
         Spinner spinnerBottom = (Spinner) findViewById(R.id.spinner_bottom);
         Spinner spinnerTop = (Spinner) findViewById(R.id.spinner_top);
         spinnerTop.setAdapter(spinnerAdapter);
@@ -194,15 +181,15 @@ public class MainActivity extends AppCompatActivity {
         spinnerBottom.setSelection(1);
         spinnerTop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                topSpinner = spinnerAdapter.getItem(position);
-                calculations.calculate("top",topSpinner,bottomSpinner);
+                topSpinnerValue = spinnerAdapter.getItem(position);
+                calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
             }
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
         spinnerBottom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                bottomSpinner = spinnerAdapter.getItem(position);
-                calculations.calculate("top",topSpinner,bottomSpinner);
+                bottomSpinnerValue = spinnerAdapter.getItem(position);
+                calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
             }
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });

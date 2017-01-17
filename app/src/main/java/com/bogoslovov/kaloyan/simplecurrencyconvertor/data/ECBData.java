@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.widget.TextView;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.MainActivity;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
 
 import java.io.BufferedReader;
@@ -13,9 +14,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations.bottomSpinner;
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations.topSpinner;
 
 /**
  * Created by Kaloyan on 15.11.2016 г..
@@ -39,19 +37,15 @@ public class ECBData extends AsyncTask<Object, Object, String> {
 
     protected void onPostExecute(String date) {
         calculations = new Calculations(activity);
-        calculations.calculate("top",topSpinner,bottomSpinner);
+        calculations.calculate("top", MainActivity.topSpinnerValue,MainActivity.bottomSpinnerValue);
         TextView lastUpdate = (TextView) activity.findViewById(R.id.last_update_text_view);
         lastUpdate.setText("Last update: "+ date);
     }
 
     public void getData() {
-        String url = makeURL();
+        String url ="http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
         URLConnection connection =setConnectionWithECB(url);
         getInformationFromECB(connection);
-    }
-
-    private String makeURL() {
-        return "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
     }
 
     private URLConnection setConnectionWithECB(String url) {

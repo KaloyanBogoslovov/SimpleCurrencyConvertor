@@ -9,8 +9,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class Calculations {
-    public static String bottomSpinner="";
-    public static String topSpinner="";
     Activity activity;
     public Calculations(Activity activity){
         this.activity = activity;

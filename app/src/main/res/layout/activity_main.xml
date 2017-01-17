@@ -6,15 +6,14 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1ca8f4"
+    android:background="@color/background"
     android:orientation="vertical">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-
-        android:textColor="#FFFFFF">
+        android:textColor="@android:color/white">
 
         <Spinner android:id = "@+id/spinner_top"
             android:layout_width="match_parent"
@@ -23,6 +22,7 @@
 
         <EditText
             android:id="@+id/edit_text_top"
+            android:labelFor="@+id/edit_text_top"
             android:inputType="numberDecimal"
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -31,7 +31,7 @@
             android:ems="8"
             android:fontFamily="sans-serif-condensed"
             android:layout_marginBottom="20dp"
-            android:background="#FFFFFF"/>
+            android:background="@android:color/white"/>
 
         <Spinner android:id = "@+id/spinner_bottom"
             android:layout_width="match_parent"
@@ -40,6 +40,7 @@
 
         <EditText
             android:id="@+id/edit_text_bottom"
+            android:labelFor="@+id/edit_text_bottom"
             android:inputType="numberDecimal"
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -47,19 +48,20 @@
             android:ems="8"
             android:paddingLeft="16dp"
             android:fontFamily="sans-serif-condensed"
-            android:layout_marginBottom="10dp"
-            android:background="#FFFFFF"/>
+            android:layout_marginBottom="20dp"
+            android:background="@android:color/white"/>
 
         <Button
             android:id = "@+id/swap_button"
-            android:background="#03a9f4"
-            android:layout_width="150dp"
+            android:background="@color/background"
+            android:layout_width="match_parent"
             android:fontFamily="sans-serif-condensed"
             android:layout_height="50dp"
             android:text="@string/button_name"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="1dp"
-            android:textColor="#FFFFFF"
+            android:layout_marginRight="1dp"
+            android:textColor="@android:color/white"
         />
 
     </LinearLayout>
@@ -74,7 +76,7 @@
         <TextView
             android:text="@string/default_update_value"
             android:fontFamily="sans-serif-condensed"
-            android:textColor="#FFFFFF"
+            android:textColor="@android:color/white"
             android:textSize="18sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
