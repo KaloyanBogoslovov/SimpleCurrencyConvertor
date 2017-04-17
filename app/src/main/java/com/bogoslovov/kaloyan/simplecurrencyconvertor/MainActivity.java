@@ -1,7 +1,9 @@
 package com.bogoslovov.kaloyan.simplecurrencyconvertor;
 
+import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -19,12 +21,13 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBData;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBDataLoader;
 
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBData.sharedPreferences;
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBDataLoader.sharedPreferences;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks {
 
+    private static final int ECB_LOADER=1;
     public static String bottomSpinnerValue ="";
     public static String topSpinnerValue ="";
     private static final String TOP_SPINNER = "top";
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        checkForConnection();
         checkIfSharedPreferenceExists();
         initSpinners();
         initSwapButton();
@@ -42,17 +46,32 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setElevation(0f);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        checkForConnection();
-        System.out.println("The application started: onStart");
+    private void checkForConnection(){
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()) {
+            startLoader();
+        }else{
+            setLastUpdateDate();
+        }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        System.out.println("The application started: onResume");
+    private void startLoader(){
+        LoaderManager loaderManager = getLoaderManager();
+        Loader<Object> passwordLoader = loaderManager.getLoader(ECB_LOADER);
+
+        if(passwordLoader==null){
+            loaderManager.initLoader(ECB_LOADER,null,this);
+        }else{
+            loaderManager.restartLoader(ECB_LOADER,null,this);
+        }
+    }
+
+    private void setLastUpdateDate(){
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        TextView lastUpdate = (TextView) findViewById(R.id.last_update_text_view);
+        String date = "Last update: "+sharedPref.getString("date","");
+        lastUpdate.setText(date);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
     private void checkIfSharedPreferenceExists() {
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
         if (!sharedPreferences.contains("EUR")) {
@@ -161,16 +181,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void checkForConnection(){
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()) {
-            new ECBData(this).execute();
-        }else{
-            initLastUpdateTextField();
-        }
-    }
-
     private void initSpinners(){
         Constants constants = new Constants();
         final SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, R.layout.spinner_row,constants.currencies,constants.images);
@@ -195,12 +205,18 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+  @Override
+  public Loader onCreateLoader(int id, Bundle args) {
+        return new ECBDataLoader(this);
+  }
 
-    private void initLastUpdateTextField(){
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        TextView lastUpdate = (TextView) findViewById(R.id.last_update_text_view);
-        String date = "Last update: "+sharedPref.getString("date","");
-        lastUpdate.setText(date);
-    }
+  @Override
+  public void onLoadFinished(Loader loader, Object data) {
+        calculations.calculate("top", MainActivity.topSpinnerValue,MainActivity.bottomSpinnerValue);
+        setLastUpdateDate();
+  }
 
+  @Override
+  public void onLoaderReset(Loader loader) {
+  }
 }

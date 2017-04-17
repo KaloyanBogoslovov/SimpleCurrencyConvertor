@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class Calculations {
-    Activity activity;
+    private Activity activity;
     public Calculations(Activity activity){
         this.activity = activity;
     }

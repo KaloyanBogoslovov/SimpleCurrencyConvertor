@@ -1,13 +1,8 @@
 package com.bogoslovov.kaloyan.simplecurrencyconvertor.data;
 
-import android.app.Activity;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.widget.TextView;
-
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations;
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.MainActivity;
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,32 +14,24 @@ import java.net.URLConnection;
  * Created by Kaloyan on 15.11.2016 г..
  */
 
-public class ECBData extends AsyncTask<Object, Object, String> {
-    public static final int CONNECTION_TIMEOUT= Integer.parseInt(System.getProperty("ECB.connection.timeout", "10000"));
+public class ECBDataLoader extends AsyncTaskLoader {
+    private static final int CONNECTION_TIMEOUT= Integer.parseInt(System.getProperty("ECB.connection.timeout", "10000"));
     public static SharedPreferences sharedPreferences;
-    private Activity activity;
-    private String date="";
-    Calculations calculations ;
-    public ECBData(Activity activity){
-        this.activity=activity;
 
-    }
+  public ECBDataLoader(Context context) {
+      super(context);
+  }
 
-    protected String doInBackground(Object... voids) {
+  @Override
+  public Object loadInBackground() {
+
         getData();
-        return date;
-    }
 
-    protected void onPostExecute(String date) {
-        calculations = new Calculations(activity);
-        calculations.calculate("top", MainActivity.topSpinnerValue,MainActivity.bottomSpinnerValue);
-        TextView lastUpdate = (TextView) activity.findViewById(R.id.last_update_text_view);
-        lastUpdate.setText("Last update: "+ date);
-    }
+        return null;
+  }
 
-    public void getData() {
-        //String url ="http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
-        String url = "http://192.168.1.102:8090/uni/v1/department/departments/";
+    private void getData() {
+        String url ="http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
         URLConnection connection =setConnectionWithECB(url);
         getInformationFromECB(connection);
     }
@@ -67,11 +54,11 @@ public class ECBData extends AsyncTask<Object, Object, String> {
             InputStreamReader is = new InputStreamReader(connection.getInputStream());
             BufferedReader br = new BufferedReader(is);
 
-            //for (int i = 0; i < 7; i++) {
-                //br.readLine();
+            for (int i = 0; i < 7; i++) {
+                br.readLine();
             System.out.println(br.readLine());
-            //}
-            //parseData(br);
+            }
+            parseData(br);
             is.close();
 
         } catch (IOException e) {
@@ -80,10 +67,10 @@ public class ECBData extends AsyncTask<Object, Object, String> {
         }
     }
 
-    public void parseData(BufferedReader br) throws IOException {
+    private void parseData(BufferedReader br) throws IOException {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         String line = br.readLine();
-        date = line.substring(14, 24);
+        String date = line.substring(14, 24);
         editor.putString("EUR", "1");
         editor.putString("date",date);
         String remaining;
@@ -100,6 +87,7 @@ public class ECBData extends AsyncTask<Object, Object, String> {
         System.out.println("data refreshed");
         editor.commit();
         br.close();
+
     }
 
 }
