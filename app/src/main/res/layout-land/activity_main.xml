@@ -19,7 +19,8 @@
         android:textColor="@android:color/white">
 
         <Spinner android:id = "@+id/spinner_top"
-            android:layout_width="0dp"
+                 android:popupBackground="@xml/background"
+                 android:layout_width="0dp"
             android:layout_weight="1.5"
             android:layout_height="50dp" />
 
@@ -46,7 +47,8 @@
         android:textColor="@android:color/white">
 
         <Spinner android:id = "@+id/spinner_bottom"
-            android:layout_width="0dp"
+                 android:popupBackground="@xml/background"
+                 android:layout_width="0dp"
             android:layout_weight="1.5"
             android:layout_height="50dp" />
 
