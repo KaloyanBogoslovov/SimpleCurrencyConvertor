@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             editor.putString("THB", "37.744");
             editor.putString("ZAR", "15.2790");
             editor.putString("date","2016/11/18");
-            editor.commit();
+            editor.apply();
         }
     }
 

@@ -43,7 +43,8 @@ public class ECBData extends AsyncTask<Object, Object, String> {
     }
 
     public void getData() {
-        String url ="http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+        //String url ="http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+        String url = "http://192.168.1.102:8090/uni/v1/department/departments/";
         URLConnection connection =setConnectionWithECB(url);
         getInformationFromECB(connection);
     }
@@ -66,10 +67,11 @@ public class ECBData extends AsyncTask<Object, Object, String> {
             InputStreamReader is = new InputStreamReader(connection.getInputStream());
             BufferedReader br = new BufferedReader(is);
 
-            for (int i = 0; i < 7; i++) {
-                br.readLine();
-            }
-            parseData(br);
+            //for (int i = 0; i < 7; i++) {
+                //br.readLine();
+            System.out.println(br.readLine());
+            //}
+            //parseData(br);
             is.close();
 
         } catch (IOException e) {

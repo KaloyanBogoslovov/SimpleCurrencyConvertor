@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.bogoslovov.kaloyan.simplecurrencyconvertor.MainActivity"
+    android:id="@+id/activity_main"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+
+        android:textColor="@android:color/white">
+
+        <Spinner android:id = "@+id/spinner_top"
+            android:layout_width="0dp"
+            android:layout_weight="1.5"
+            android:layout_height="50dp" />
+
+        <EditText
+            android:id="@+id/edit_text_top"
+            android:labelFor="@+id/edit_text_top"
+            android:inputType="numberDecimal"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="50dp"
+            android:textSize="20sp"
+            android:ems="8"
+            android:paddingLeft="16dp"
+            android:fontFamily="sans-serif-condensed"
+            android:background="@android:color/white"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+
+        android:textColor="@android:color/white">
+
+        <Spinner android:id = "@+id/spinner_bottom"
+            android:layout_width="0dp"
+            android:layout_weight="1.5"
+            android:layout_height="50dp" />
+
+        <EditText
+            android:id="@+id/edit_text_bottom"
+            android:labelFor="@+id/edit_text_bottom"
+            android:inputType="numberDecimal"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:textSize="20sp"
+            android:ems="8"
+            android:paddingLeft="16dp"
+            android:fontFamily="sans-serif-condensed"
+            android:background="@android:color/white"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
+
+        <Button
+            android:id = "@+id/swap_button"
+            android:background="@color/background"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_height="50dp"
+            android:text="@string/button_name"
+            android:layout_margin="10dp"
+            android:textColor="@android:color/white"
+            />
+
+        <TextView
+            android:text="@string/default_update_value"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:id="@+id/last_update_text_view"/>
+
+    </LinearLayout>
+</LinearLayout>
