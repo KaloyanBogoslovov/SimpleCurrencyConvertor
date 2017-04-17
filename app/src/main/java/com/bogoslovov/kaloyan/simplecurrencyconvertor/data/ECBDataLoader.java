@@ -23,10 +23,14 @@ public class ECBDataLoader extends AsyncTaskLoader {
   }
 
   @Override
+  protected void onStartLoading() {
+        super.onStartLoading();
+        forceLoad();
+  }
+
+  @Override
   public Object loadInBackground() {
-
         getData();
-
         return null;
   }
 
@@ -53,10 +57,8 @@ public class ECBDataLoader extends AsyncTaskLoader {
         try {
             InputStreamReader is = new InputStreamReader(connection.getInputStream());
             BufferedReader br = new BufferedReader(is);
-
             for (int i = 0; i < 7; i++) {
                 br.readLine();
-            System.out.println(br.readLine());
             }
             parseData(br);
             is.close();

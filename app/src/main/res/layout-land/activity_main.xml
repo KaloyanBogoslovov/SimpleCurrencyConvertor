@@ -8,7 +8,7 @@
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@xml/background">
 
     <LinearLayout
         android:orientation="horizontal"
@@ -75,11 +75,12 @@
 
         <Button
             android:id = "@+id/swap_button"
-            android:background="@color/background"
+            android:background="@xml/background"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:fontFamily="sans-serif-condensed"
             android:layout_height="50dp"
+            android:textSize="20sp"
             android:text="@string/button_name"
             android:layout_margin="10dp"
             android:textColor="@android:color/white"

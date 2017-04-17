@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         initSpinners();
         initSwapButton();
         initEditTextFields();
+      System.out.println("onCreate");
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         getSupportActionBar().setElevation(0f);
     }
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()) {
+          System.out.println("ima jica");
             startLoader();
         }else{
             setLastUpdateDate();
