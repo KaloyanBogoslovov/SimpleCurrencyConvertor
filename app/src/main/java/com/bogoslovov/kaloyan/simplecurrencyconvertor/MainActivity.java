@@ -150,6 +150,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private void initEditTextFields() {
         final EditText editTextTop = (EditText) findViewById(R.id.edit_text_top);
+        final EditText editTextBottom = (EditText) findViewById(R.id.edit_text_bottom);
+
         editTextTop.setText("1");
         editTextTop.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -158,11 +160,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
             public void afterTextChanged(Editable editable) {
                 if (editTextTop.isFocused()) {
-//                    if (editTextTop.getText().toString().equals("0")){
-//                        editTextTop.setText("0.");
-//                        editTextTop.setSelection(editTextTop.getText().length());
-//                    }
-                    if (!editTextTop.getText().toString().equals("")) {
+                    if (editTextTop.getText().toString().equals(".")){
+                        editTextTop.setText("0.");
+                        editTextTop.setSelection(editTextTop.getText().length());
+                    }
+                    else if(editTextTop.getText().toString().equals("")) {
+                        editTextBottom.setText("0.000");
+                    }else{
                         calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
                     }
                     System.out.println("bottom listener activated");
@@ -170,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         });
 
-        final EditText editTextBottom = (EditText) findViewById(R.id.edit_text_bottom);
+
         editTextBottom.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -178,11 +182,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
             public void afterTextChanged(Editable editable) {
                 if (editTextBottom.isFocused()) {
-//                    if (editTextBottom.getText().toString().equals("0")){
-//                        editTextBottom.setText("0.");
-//                        editTextBottom.setSelection(editTextBottom.getText().length());
-//                    }
-                    if (!editTextBottom.getText().toString().equals("")) {
+                     if(editTextBottom.getText().toString().equals("")) {
+                        editTextTop.setText("0.000");
+                    }else if (editTextBottom.getText().toString().equals(".")){
+                        editTextBottom.setText("0.");
+                        editTextBottom.setSelection(editTextBottom.getText().length());
+                    }else{
                         calculations.calculate(BOTTOM_SPINNER, topSpinnerValue, bottomSpinnerValue);
                     }
                     System.out.println("bottom listener activated");
