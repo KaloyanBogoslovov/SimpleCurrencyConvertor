@@ -20,14 +20,30 @@ public class Calculations {
         EditText editTextTop = (EditText) activity.findViewById(R.id.edit_text_top);
         EditText editTextBottom= (EditText) activity.findViewById(R.id.edit_text_bottom);
         if (topOrBottom == "top") {
+            BigDecimal inputValue;
             BigDecimal exchangeRate =convert(topSpinnerValue, bottomSpinnerValue);
-            BigDecimal inputValue =  new BigDecimal(editTextTop.getText().toString());
+            if (editTextTop.getText().toString().equals(".")){
+                inputValue =  new BigDecimal(0);
+                editTextTop.setText("0.");
+                editTextTop.setSelection(editTextTop.getText().length());
+            }else{
+                inputValue =  new BigDecimal(editTextTop.getText().toString());
+            }
             BigDecimal result = exchangeRate.multiply(inputValue).setScale(3, RoundingMode.HALF_UP);
             editTextBottom.setText(result.toString());
 
         } else {
+
+            BigDecimal inputValue;
             BigDecimal exchangeRate =convert(bottomSpinnerValue, topSpinnerValue);
-            BigDecimal inputValue = new BigDecimal(editTextBottom.getText().toString());
+            if (editTextBottom.getText().toString().equals(".")){
+                inputValue =  new BigDecimal(0);
+                editTextBottom.setText("0.");
+                editTextBottom.setSelection(editTextBottom.getText().length());
+            }else{
+                inputValue =  new BigDecimal(editTextBottom.getText().toString());
+            }
+
             BigDecimal result = exchangeRate.multiply(inputValue).setScale(3, RoundingMode.HALF_UP);
             editTextTop.setText(result.toString());
         }

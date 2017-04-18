@@ -158,6 +158,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
             public void afterTextChanged(Editable editable) {
                 if (editTextTop.isFocused()) {
+//                    if (editTextTop.getText().toString().equals("0")){
+//                        editTextTop.setText("0.");
+//                        editTextTop.setSelection(editTextTop.getText().length());
+//                    }
                     if (!editTextTop.getText().toString().equals("")) {
                         calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
                     }
@@ -174,6 +178,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
             public void afterTextChanged(Editable editable) {
                 if (editTextBottom.isFocused()) {
+//                    if (editTextBottom.getText().toString().equals("0")){
+//                        editTextBottom.setText("0.");
+//                        editTextBottom.setSelection(editTextBottom.getText().length());
+//                    }
                     if (!editTextBottom.getText().toString().equals("")) {
                         calculations.calculate(BOTTOM_SPINNER, topSpinnerValue, bottomSpinnerValue);
                     }
