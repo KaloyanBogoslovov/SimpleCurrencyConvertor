@@ -22,4 +22,7 @@ public class Constants {
             R.drawable.mxn,R.drawable.myr,R.drawable.nzd,R.drawable.php,
             R.drawable.sgd,R.drawable.thb,R.drawable.zar};
 
+    public static final String ECB_URL = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+    public static final String TOP_SPINNER = "top";
+    public static final String BOTTOM_SPINNER="bottom";
 }

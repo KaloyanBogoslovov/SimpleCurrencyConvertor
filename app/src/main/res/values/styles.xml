@@ -5,7 +5,6 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/test</item>
         <item name="colorPrimaryDark">@color/test</item>
-
     </style>
 
 </resources>

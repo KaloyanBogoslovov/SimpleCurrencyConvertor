@@ -4,17 +4,28 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.dto.DataFromServerDTO;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+import static android.R.attr.action;
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Constants.ECB_URL;
+
 /**
  * Created by Kaloyan on 15.11.2016 г..
  */
 
-public class ECBDataLoader extends AsyncTaskLoader {
+public class ECBDataLoader extends AsyncTaskLoader<DataFromServerDTO> {
     private static final int CONNECTION_TIMEOUT= Integer.parseInt(System.getProperty("ECB.connection.timeout", "10000"));
     public static SharedPreferences sharedPreferences;
 
@@ -29,14 +40,29 @@ public class ECBDataLoader extends AsyncTaskLoader {
   }
 
   @Override
-  public Object loadInBackground() {
-        getData();
+  public DataFromServerDTO loadInBackground() {
+
+      DataFromServerDTO data=null;
+      try {
+          OkHttpClient client = new OkHttpClient();
+          Response response = client.newCall(ECB_URL).execute();
+          String body = response.body().string();
+          int responseCode = response.code();
+          data = new DataFromServerDTO();
+          data.setBody(body);
+          data.setResponseCode(responseCode);
+      } catch (IOException e) {
+          e.printStackTrace();
+      }
+
+      return data;
+
+        updateDataFromECB();
         return null;
   }
 
-    private void getData() {
-        String url ="http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
-        URLConnection connection =setConnectionWithECB(url);
+    private void updateDataFromECB() {
+        URLConnection connection =setConnectionWithECB(ECB_URL);
         getInformationFromECB(connection);
     }
 

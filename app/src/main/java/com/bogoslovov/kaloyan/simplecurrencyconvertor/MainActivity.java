@@ -20,29 +20,29 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBDataLoader;
 
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBDataLoader.sharedPreferences;
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Constants.BOTTOM_SPINNER;
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Constants.TOP_SPINNER;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks {
 
     private static final int ECB_LOADER=1;
-    public static String bottomSpinnerValue ="";
-    public static String topSpinnerValue ="";
-    private static final String TOP_SPINNER = "top";
-    private static final String BOTTOM_SPINNER="bottom";
+    private static String bottomSpinnerValue ="";
+    private static String topSpinnerValue ="";
+
     Calculations calculations = new Calculations(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkForConnection();
-        checkIfSharedPreferenceExists();
+        Utils.checkIfSharedPreferenceExists(this);
         initSpinners();
         initSwapButton();
         initEditTextFields();
-      System.out.println("onCreate");
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         getSupportActionBar().setElevation(0f);
     }
@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()) {
-          System.out.println("ima jica");
             startLoader();
         }else{
             setLastUpdateDate();
@@ -94,46 +93,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         return super.onOptionsItemSelected(item);
     }
 
-    private void checkIfSharedPreferenceExists() {
-        sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-        if (!sharedPreferences.contains("EUR")) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString("EUR", "1");
-            editor.putString("JPY", "116.95");
-            editor.putString("BGN", "1.9558");
-            editor.putString("CZK", "27.035");
-            editor.putString("DKK", "7.4399");
-            editor.putString("GBP", "0.86218");
-            editor.putString("HUF", "309.49");
-            editor.putString("USD", "1.0629");
-            editor.putString("PLN", "4.4429");
-            editor.putString("RON", "4.5150");
-            editor.putString("SEK", "9.8243");
-            editor.putString("CHF", "1.0711");
-            editor.putString("NOK", "9.1038");
-            editor.putString("HRK", "7.5320");
-            editor.putString("RUB", "68.7941");
-            editor.putString("TRY", "3.5798");
-            editor.putString("AUD", "1.4376");
-            editor.putString("BRL", "3.6049");
-            editor.putString("CAD", "1.4365");
-            editor.putString("CNY", "7.3156");
-            editor.putString("HKD", "8.2450");
-            editor.putString("IDR", "14272.09");
-            editor.putString("ILS", "4.1163");
-            editor.putString("INR", "72.2170");
-            editor.putString("KRW", "1250.14");
-            editor.putString("MXN", "21.6968");
-            editor.putString("MYR", "4.6810");
-            editor.putString("NZD", "1.5073");
-            editor.putString("PHP", "52.687");
-            editor.putString("SGD", "1.5107");
-            editor.putString("THB", "37.744");
-            editor.putString("ZAR", "15.2790");
-            editor.putString("date","2016/11/18");
-            editor.apply();
-        }
-    }
 
     private void initSwapButton(){
         Button swapButton = (Button) findViewById(R.id.swap_button);
@@ -169,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     }else{
                         calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
                     }
-                    System.out.println("bottom listener activated");
                 }
             }
         });
@@ -190,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     }else{
                         calculations.calculate(BOTTOM_SPINNER, topSpinnerValue, bottomSpinnerValue);
                     }
-                    System.out.println("bottom listener activated");
                 }
             }
         });
@@ -227,8 +184,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
   @Override
   public void onLoadFinished(Loader loader, Object data) {
-        calculations.calculate("top", MainActivity.topSpinnerValue,MainActivity.bottomSpinnerValue);
+        calculations.calculate(TOP_SPINNER, topSpinnerValue,bottomSpinnerValue);
         setLastUpdateDate();
+      Toast.makeText(this, R.string.exchange_rates_updated,Toast.LENGTH_SHORT).show();
   }
 
   @Override
