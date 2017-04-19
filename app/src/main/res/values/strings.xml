@@ -7,4 +7,5 @@
     <string name="data_storage_information">  The app stores the newest data locally, so it can be used without internet connection.</string>
     <string name="data_source_information">  The application uses data from the European central bank website.</string>
     <string name="exchange_rates_updated">Exchange rates updated</string>
+    <string name="exchange_rates_update_failed">Exchange rates not updated. Try again later</string>
 </resources>

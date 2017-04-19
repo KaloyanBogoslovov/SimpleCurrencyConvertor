@@ -1,7 +1,9 @@
-package com.bogoslovov.kaloyan.simplecurrencyconvertor;
+package com.bogoslovov.kaloyan.simplecurrencyconvertor.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
 
 /**
  * Created by Kaloyan on 15.11.2016 г..

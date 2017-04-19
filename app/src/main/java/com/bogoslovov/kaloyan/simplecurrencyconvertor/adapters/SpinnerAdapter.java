@@ -1,4 +1,4 @@
-package com.bogoslovov.kaloyan.simplecurrencyconvertor;
+package com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
 
 /**
  * Created by Kaloyan on 15.11.2016 г..

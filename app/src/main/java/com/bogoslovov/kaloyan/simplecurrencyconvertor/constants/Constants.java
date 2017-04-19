@@ -1,10 +1,19 @@
-package com.bogoslovov.kaloyan.simplecurrencyconvertor;
+package com.bogoslovov.kaloyan.simplecurrencyconvertor.constants;
+
+import android.content.SharedPreferences;
+
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
 
 /**
  * Created by Kaloyan on 17.1.2017 г..
  */
 
 public class Constants {
+    public static final String ECB_URL = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+    public static final String TOP_SPINNER = "top";
+    public static final String BOTTOM_SPINNER="bottom";
+    public static final int CONNECTION_TIMEOUT= Integer.parseInt(System.getProperty("ECB.connection.timeout", "10000"));
+    public static SharedPreferences sharedPreferences;
 
     public final String [] currencies={"EUR Euro", "USD US dollar", "JPY Japanese yen", "BGN Bulgarian lev", "CZK Czech koruna",
             "DKK Danish krone", "GBP Pound sterling", "HUF Hungarian forint", "PLN Polish zloty", "RON Romanian leu",
@@ -22,7 +31,5 @@ public class Constants {
             R.drawable.mxn,R.drawable.myr,R.drawable.nzd,R.drawable.php,
             R.drawable.sgd,R.drawable.thb,R.drawable.zar};
 
-    public static final String ECB_URL = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
-    public static final String TOP_SPINNER = "top";
-    public static final String BOTTOM_SPINNER="bottom";
+
 }

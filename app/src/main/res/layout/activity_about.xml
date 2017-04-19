@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:id="@+id/activity_about"
     android:background="@xml/background"
-    android:padding="10dp"
+    android:padding="16dp"
 
     >
 

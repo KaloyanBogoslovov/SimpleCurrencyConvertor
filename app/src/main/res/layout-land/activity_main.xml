@@ -3,7 +3,7 @@
     android:orientation="vertical"
 
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.bogoslovov.kaloyan.simplecurrencyconvertor.MainActivity"
+    tools:context="com.bogoslovov.kaloyan.simplecurrencyconvertor.activities.MainActivity"
     android:id="@+id/activity_main"
 
     android:layout_width="match_parent"

@@ -4,16 +4,16 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBDataLoader.sharedPreferences;
+import java.io.BufferedReader;
+import java.io.IOException;
+
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.sharedPreferences;
 
 /**
  * Created by kaloqn on 4/19/17.
  */
 
 public class Utils {
-
-
-
 
     public static void checkIfSharedPreferenceExists(Activity activity) {
         sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
@@ -93,6 +93,34 @@ public class Utils {
             case"ZAR South African rand": return "ZAR";
         }
         return "EUR";
+    }
+
+    public static void parseAndSaveData(BufferedReader br) throws IOException {
+        for (int i = 0; i < 7; i++) {
+            br.readLine();
+            System.out.println(br.toString());
+        }
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        String line = br.readLine();
+        String date = line.substring(14, 24);
+        editor.putString("EUR", "1");
+        editor.putString("date",date);
+        String remaining;
+        String symbol;
+        String rate;
+        for (int i = 0; i < 31; i++) {
+            System.out.println(br.toString());
+            line = br.readLine();
+            remaining = line.substring(19);
+            symbol = remaining.substring(0,3);
+            rate = remaining.substring(11, remaining.length()-3);
+            editor.putString(symbol, rate);
+
+        }
+        System.out.println("data refreshed");
+        editor.commit();
+        br.close();
+
     }
 
 }

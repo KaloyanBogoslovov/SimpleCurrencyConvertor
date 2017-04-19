@@ -2,7 +2,7 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.bogoslovov.kaloyan.simplecurrencyconvertor.MainActivity"
+    tools:context="com.bogoslovov.kaloyan.simplecurrencyconvertor.activities.MainActivity"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -57,7 +57,7 @@
 
         <Button
             android:id = "@+id/swap_button"
-            android:background="@xml/background"
+            android:background="@color/colorPrimary"
             android:layout_width="match_parent"
             android:fontFamily="sans-serif-condensed"
             android:layout_height="50dp"

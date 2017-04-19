@@ -8,7 +8,7 @@ import android.widget.EditText;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Constants.TOP_SPINNER;
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.TOP_SPINNER;
 
 public class Calculations {
     private Activity activity;

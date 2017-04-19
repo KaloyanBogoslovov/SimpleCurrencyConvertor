@@ -1,4 +1,4 @@
-package com.bogoslovov.kaloyan.simplecurrencyconvertor;
+package com.bogoslovov.kaloyan.simplecurrencyconvertor.activities;
 
 import android.app.LoaderManager;
 import android.content.Context;
@@ -22,12 +22,20 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.data.ECBDataLoader;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.Utils;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters.SpinnerAdapter;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBDataLoader;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
 
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Constants.BOTTOM_SPINNER;
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Constants.TOP_SPINNER;
+import java.io.IOException;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks {
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.BOTTOM_SPINNER;
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.TOP_SPINNER;
+
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DataFromServerDTO> {
 
     private static final int ECB_LOADER=1;
     private static String bottomSpinnerValue ="";
@@ -44,7 +52,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         initSwapButton();
         initEditTextFields();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        getSupportActionBar().setElevation(0f);
+        if (getSupportActionBar()!=null) {
+            getSupportActionBar().setElevation(0f);
+        }
     }
 
     private void checkForConnection(){
@@ -178,18 +188,27 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
   @Override
-  public Loader onCreateLoader(int id, Bundle args) {
+  public Loader<DataFromServerDTO> onCreateLoader(int id, Bundle args) {
         return new ECBDataLoader(this);
   }
 
   @Override
-  public void onLoadFinished(Loader loader, Object data) {
-        calculations.calculate(TOP_SPINNER, topSpinnerValue,bottomSpinnerValue);
-        setLastUpdateDate();
-      Toast.makeText(this, R.string.exchange_rates_updated,Toast.LENGTH_SHORT).show();
+  public void onLoadFinished(Loader<DataFromServerDTO> loader, DataFromServerDTO data) {
+      if(data.getResponseCode()==200) {
+          try {
+              Utils.parseAndSaveData(data.getBody());
+          } catch (IOException e) {
+              e.printStackTrace();
+          }
+          calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
+          setLastUpdateDate();
+          Toast.makeText(this, R.string.exchange_rates_updated, Toast.LENGTH_SHORT).show();
+      }else{
+          Toast.makeText(this, R.string.exchange_rates_update_failed, Toast.LENGTH_SHORT).show();
+      }
   }
 
   @Override
-  public void onLoaderReset(Loader loader) {
+  public void onLoaderReset(Loader<DataFromServerDTO> loader) {
   }
 }
