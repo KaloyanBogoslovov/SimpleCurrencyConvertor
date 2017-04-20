@@ -17,8 +17,8 @@ public class Calculations {
     }
 
     public void calculate(String topOrBottom, String topSpinner, String bottomSpinner) {
-        String topSpinnerValue = Utils.getSpinnerValue(topSpinner);
-        String bottomSpinnerValue = Utils.getSpinnerValue(bottomSpinner);
+        String topSpinnerValue = getSpinnerValue(topSpinner);
+        String bottomSpinnerValue = getSpinnerValue(bottomSpinner);
         EditText editTextTop = (EditText) activity.findViewById(R.id.edit_text_top);
         EditText editTextBottom= (EditText) activity.findViewById(R.id.edit_text_bottom);
 
@@ -33,6 +33,45 @@ public class Calculations {
             BigDecimal result = exchangeRate.multiply(inputValue).setScale(3, RoundingMode.HALF_UP);
             editTextTop.setText(result.toString());
         }
+    }
+
+    private String getSpinnerValue(String spinner){
+
+        switch (spinner){
+            case"EUR Euro": return "EUR";
+            case"USD US dollar": return "USD";
+            case"JPY Japanese yen": return "JPY";
+            case"BGN Bulgarian lev": return "BGN";
+            case"CZK Czech koruna": return "CZK";
+            case"DKK Danish krone": return "DKK";
+            case"GBP Pound sterling": return "GBP";
+            case"HUF Hungarian forint": return "HUF";
+            case"PLN Polish zloty": return "PLN";
+            case"RON Romanian leu": return "RON";
+            case"SEK Swedish krona": return "SEK";
+            case"CHF Swiss franc": return "CHF";
+            case"NOK Norwegian krone": return "NOK";
+            case"HRK Croatian kuna": return "HRK";
+            case"RUB Russian rouble": return "RUB";
+            case"TRY Turkish lira": return "TRY";
+            case"AUD Australian dollar": return "AUD";
+            case"BRL Brazilian real": return "BRL";
+            case"CAD Canadian dollar": return "CAD";
+            case"CNY Chinese yuan": return "CNY";
+            case"HKD Hong Kong dollar": return "HKD";
+            case"IDR Indonesian rupiah": return "IDR";
+            case"ILS Israeli shekel": return "ILS";
+            case"INR Indian rupee": return "INR";
+            case"KRW South Korean won": return "KRW";
+            case"MXN Mexican peso": return "MXN";
+            case"MYR Malaysian ringgit": return "MYR";
+            case"NZD New Zealand dollar": return "NZD";
+            case"PHP Philippine peso": return "PHP";
+            case"SGD Singapore dollar": return "SGD";
+            case"THB Thai baht": return "THB";
+            case"ZAR South African rand": return "ZAR";
+        }
+        return "EUR";
     }
 
     private BigDecimal convert(String key, String target){

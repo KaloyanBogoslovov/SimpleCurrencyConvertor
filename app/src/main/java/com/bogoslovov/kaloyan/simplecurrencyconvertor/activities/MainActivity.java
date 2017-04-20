@@ -1,5 +1,6 @@
 package com.bogoslovov.kaloyan.simplecurrencyconvertor.activities;
 
+import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -24,16 +25,17 @@ import android.widget.Toast;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.Utils;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters.SpinnerAdapter;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBDataLoader;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBDataLoader;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.BOTTOM_SPINNER;
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.TOP_SPINNER;
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.sharedPreferences;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DataFromServerDTO> {
 
@@ -41,13 +43,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static String bottomSpinnerValue ="";
     private static String topSpinnerValue ="";
 
-    Calculations calculations = new Calculations(this);
+    private Calculations calculations = new Calculations(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkForConnection();
-        Utils.checkIfSharedPreferenceExists(this);
+        checkIfSharedPreferenceExists(this);
         initSpinners();
         initSwapButton();
         initEditTextFields();
@@ -83,6 +85,47 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         TextView lastUpdate = (TextView) findViewById(R.id.last_update_text_view);
         String date = "Last update: "+sharedPref.getString("date","");
         lastUpdate.setText(date);
+    }
+
+    private void checkIfSharedPreferenceExists(Activity activity) {
+        sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
+        if (!sharedPreferences.contains("EUR")) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("EUR", "1");
+            editor.putString("JPY", "116.95");
+            editor.putString("BGN", "1.9558");
+            editor.putString("CZK", "27.035");
+            editor.putString("DKK", "7.4399");
+            editor.putString("GBP", "0.86218");
+            editor.putString("HUF", "309.49");
+            editor.putString("USD", "1.0629");
+            editor.putString("PLN", "4.4429");
+            editor.putString("RON", "4.5150");
+            editor.putString("SEK", "9.8243");
+            editor.putString("CHF", "1.0711");
+            editor.putString("NOK", "9.1038");
+            editor.putString("HRK", "7.5320");
+            editor.putString("RUB", "68.7941");
+            editor.putString("TRY", "3.5798");
+            editor.putString("AUD", "1.4376");
+            editor.putString("BRL", "3.6049");
+            editor.putString("CAD", "1.4365");
+            editor.putString("CNY", "7.3156");
+            editor.putString("HKD", "8.2450");
+            editor.putString("IDR", "14272.09");
+            editor.putString("ILS", "4.1163");
+            editor.putString("INR", "72.2170");
+            editor.putString("KRW", "1250.14");
+            editor.putString("MXN", "21.6968");
+            editor.putString("MYR", "4.6810");
+            editor.putString("NZD", "1.5073");
+            editor.putString("PHP", "52.687");
+            editor.putString("SGD", "1.5107");
+            editor.putString("THB", "37.744");
+            editor.putString("ZAR", "15.2790");
+            editor.putString("date","2016/11/18");
+            editor.apply();
+        }
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -196,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
   public void onLoadFinished(Loader<DataFromServerDTO> loader, DataFromServerDTO data) {
       if(data.getResponseCode()==200) {
           try {
-              Utils.parseAndSaveData(data.getBody());
+              parseAndSaveData(data.getBody());
           } catch (IOException e) {
               e.printStackTrace();
           }
@@ -207,6 +250,34 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
           Toast.makeText(this, R.string.exchange_rates_update_failed, Toast.LENGTH_SHORT).show();
       }
   }
+
+    private  void parseAndSaveData(BufferedReader br) throws IOException {
+        for (int i = 0; i < 7; i++) {
+            br.readLine();
+            System.out.println(br.toString());
+        }
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        String line = br.readLine();
+        String date = line.substring(14, 24);
+        editor.putString("EUR", "1");
+        editor.putString("date",date);
+        String remaining;
+        String symbol;
+        String rate;
+        for (int i = 0; i < 31; i++) {
+            System.out.println(br.toString());
+            line = br.readLine();
+            remaining = line.substring(19);
+            symbol = remaining.substring(0,3);
+            rate = remaining.substring(11, remaining.length()-3);
+            editor.putString(symbol, rate);
+
+        }
+        System.out.println("data refreshed");
+        editor.commit();
+        br.close();
+
+    }
 
   @Override
   public void onLoaderReset(Loader<DataFromServerDTO> loader) {
