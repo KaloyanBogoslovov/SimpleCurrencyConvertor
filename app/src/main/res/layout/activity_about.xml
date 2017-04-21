@@ -10,27 +10,15 @@
 
     <TextView
         android:text="@string/update_information"
-        android:fontFamily="sans-serif-condensed"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        style="@style/AboutActivityEditTextStyle"
         android:id="@+id/textView" />
     <TextView
         android:text="@string/data_storage_information"
-        android:fontFamily="sans-serif-condensed"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        style="@style/AboutActivityEditTextStyle"
         android:id="@+id/textView2" />
     <TextView
         android:text="@string/data_source_information"
-        android:fontFamily="sans-serif-condensed"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        style="@style/AboutActivityEditTextStyle"
         android:id="@+id/textView3" />
 
 </LinearLayout>

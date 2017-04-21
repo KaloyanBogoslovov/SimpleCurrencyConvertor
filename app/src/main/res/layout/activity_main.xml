@@ -21,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
                  android:popupBackground="@xml/background"
-                 android:layout_marginBottom="10dp"/>
+                 android:layout_marginBottom="16dp"/>
 
         <EditText
             android:id="@+id/edit_text_top"
@@ -33,14 +33,14 @@
             android:paddingLeft="16dp"
             android:ems="8"
             android:fontFamily="sans-serif-condensed"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="24dp"
             android:background="@android:color/white"/>
 
         <Spinner android:id = "@+id/spinner_bottom"
             android:popupBackground="@xml/background"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginBottom="10dp"/>
+            android:layout_marginBottom="16dp"/>
 
         <EditText
             android:id="@+id/edit_text_bottom"
@@ -52,18 +52,18 @@
             android:ems="8"
             android:paddingLeft="16dp"
             android:fontFamily="sans-serif-condensed"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="32dp"
             android:background="@android:color/white"/>
 
         <Button
             android:id = "@+id/swap_button"
-            android:background="@color/colorPrimary"
+            android:background="@android:color/holo_orange_dark"
             android:layout_width="match_parent"
             android:fontFamily="sans-serif-condensed"
             android:layout_height="50dp"
+            android:radius="10dp"
             android:textSize="20sp"
             android:text="@string/button_name"
-            android:layout_marginBottom="10dp"
             android:layout_marginLeft="1dp"
             android:layout_marginRight="1dp"
             android:textColor="@android:color/white"

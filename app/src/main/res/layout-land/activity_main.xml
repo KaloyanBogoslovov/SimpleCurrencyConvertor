@@ -78,7 +78,7 @@
 
         <Button
             android:id = "@+id/swap_button"
-            android:background="@xml/background"
+            android:background="@android:color/holo_orange_dark"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:fontFamily="sans-serif-condensed"
