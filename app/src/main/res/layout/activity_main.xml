@@ -30,11 +30,12 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:textSize="20sp"
+            android:textCursorDrawable = "@xml/edit_text_cursor"
             android:paddingLeft="16dp"
             android:ems="8"
             android:fontFamily="sans-serif-condensed"
-            android:layout_marginBottom="24dp"
-            android:background="@android:color/white"/>
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="24dp"/>
 
         <Spinner android:id = "@+id/spinner_bottom"
             android:popupBackground="@xml/background"
@@ -50,10 +51,11 @@
             android:layout_height="50dp"
             android:textSize="20sp"
             android:ems="8"
+            android:textColor="@android:color/white"
+            android:textCursorDrawable = "@null"
             android:paddingLeft="16dp"
             android:fontFamily="sans-serif-condensed"
-            android:layout_marginBottom="32dp"
-            android:background="@android:color/white"/>
+            android:layout_marginBottom="32dp"/>
 
         <Button
             android:id = "@+id/swap_button"
