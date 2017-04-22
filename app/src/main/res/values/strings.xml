@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Simple Currency Convertor</string>
     <string name="action_about">About</string>
-    <string name="button_name">Swap</string>
+    <string name="button_name">Swap currencies</string>
     <string name="default_update_value">Last update: 2016-11-18</string>
     <string name="update_information">  The exchange rates are updated every time the application is started, or the orientation of the device is changed.</string>
     <string name="data_storage_information">  The app stores the newest data locally, so it can be used without internet connection.</string>
