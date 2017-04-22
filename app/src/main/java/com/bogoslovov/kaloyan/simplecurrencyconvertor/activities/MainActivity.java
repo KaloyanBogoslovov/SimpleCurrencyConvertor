@@ -35,14 +35,13 @@ import java.io.IOException;
 
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.BOTTOM_SPINNER;
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.TOP_SPINNER;
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.sharedPreferences;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DataFromServerDTO> {
 
     private static final int ECB_LOADER=1;
     private static String bottomSpinnerValue ="";
     private static String topSpinnerValue ="";
-
+    private SharedPreferences sharedPreferences;
     private Calculations calculations = new Calculations(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
