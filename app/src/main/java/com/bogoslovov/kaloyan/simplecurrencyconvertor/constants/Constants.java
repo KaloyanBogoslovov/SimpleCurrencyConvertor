@@ -29,5 +29,4 @@ public class Constants {
             R.drawable.mxn,R.drawable.myr,R.drawable.nzd,R.drawable.php,
             R.drawable.sgd,R.drawable.thb,R.drawable.zar};
 
-
 }
