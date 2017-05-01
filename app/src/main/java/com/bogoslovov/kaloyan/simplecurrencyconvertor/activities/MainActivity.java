@@ -28,6 +28,7 @@ import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters.SpinnerAdapter;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.HistoricDataDTO;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBDataLoader;
 
 import java.io.BufferedReader;
@@ -38,7 +39,8 @@ import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DataFromServerDTO> {
 
-    private static final int ECB_LOADER=1;
+    private static final int ECB_DAILY_LOADER =1;
+    private static final int ECB_90_DAYS_LOADER  = 2;
     private static String bottomSpinnerValue ="";
     private static String topSpinnerValue ="";
     private SharedPreferences sharedPreferences;
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         checkIfSharedPreferenceExists(this);
         initSpinners();
         initSwapButton();
+        initShowChartButton();
         initEditTextFields();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         if (getSupportActionBar()!=null) {
@@ -62,20 +65,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()) {
-            startLoader();
+            startLoader(ECB_DAILY_LOADER);
         }else{
             setLastUpdateDate();
         }
     }
 
-    private void startLoader(){
+    private void startLoader(int loaderToStart){
         LoaderManager loaderManager = getLoaderManager();
-        Loader<Object> passwordLoader = loaderManager.getLoader(ECB_LOADER);
+        Loader<Object> passwordLoader = loaderManager.getLoader(loaderToStart);
 
         if(passwordLoader==null){
-            loaderManager.initLoader(ECB_LOADER,null,this);
+            loaderManager.initLoader(loaderToStart,null,this);
         }else{
-            loaderManager.restartLoader(ECB_LOADER,null,this);
+            loaderManager.restartLoader(loaderToStart,null,this);
         }
     }
 
@@ -155,6 +158,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 int position = spinnerBottom.getSelectedItemPosition();
                 spinnerBottom.setSelection(spinnerTop.getSelectedItemPosition());
                 spinnerTop.setSelection(position);
+
+            }
+        });
+    }
+
+    private void initShowChartButton(){
+        Button showChartButton = (Button) findViewById(R.id.show_chart_button);
+        showChartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                startLoader(ECB_90_DAYS_LOADER);
+                //temporary///
+//                Intent intent = new Intent (MainActivity.this,ChartActivity.class);
+//                startActivity(intent);
             }
         });
     }
@@ -192,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
             public void afterTextChanged(Editable editable) {
                 if (editTextBottom.isFocused()) {
-                     if(editTextBottom.getText().toString().equals("")) {
+                    if(editTextBottom.getText().toString().equals("")) {
                         editTextTop.setText("0.000");
                     }else if (editTextBottom.getText().toString().equals(".")){
                         editTextBottom.setText("0.");
@@ -229,32 +247,126 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         });
     }
 
-  @Override
-  public Loader<DataFromServerDTO> onCreateLoader(int id, Bundle args) {
-        return new ECBDataLoader(this);
-  }
+    @Override
+    public Loader<DataFromServerDTO> onCreateLoader(int loaderId, Bundle args) {
 
-  @Override
-  public void onLoadFinished(Loader<DataFromServerDTO> loader, DataFromServerDTO data) {
-      if(data.getResponseCode()==200) {
-          try {
-              parseAndSaveData(data.getBody());
-          } catch (IOException e) {
-              e.printStackTrace();
-          }
-          calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
-          setLastUpdateDate();
-          Toast.makeText(this, R.string.exchange_rates_updated, Toast.LENGTH_SHORT).show();
-      }else{
-          Toast.makeText(this, R.string.exchange_rates_update_failed, Toast.LENGTH_SHORT).show();
-      }
-  }
+        ECBDataLoader loader = null;
+        switch (loaderId){
+            case ECB_DAILY_LOADER:
+                Toast.makeText(this, "daily", Toast.LENGTH_SHORT).show();
+                loader = new ECBDataLoader(this,Constants.ECB_DAILY_URL);
+                break;
 
-    private  void parseAndSaveData(BufferedReader br) throws IOException {
-        for (int i = 0; i < 7; i++) {
-            br.readLine();
-            System.out.println(br.toString());
+            case ECB_90_DAYS_LOADER:
+                Toast.makeText(this, "90 days loader", Toast.LENGTH_SHORT).show();
+                loader = new ECBDataLoader(this,Constants.ECB_90_DAYS_URL);
+                break;
         }
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DataFromServerDTO> loader, DataFromServerDTO data) {
+
+        switch (loader.getId()){
+            case ECB_DAILY_LOADER:
+                onLoadFinishedECBDailyLoader(data);
+                break;
+            case ECB_90_DAYS_LOADER:
+                onLoadFinishedECB90DaysLoader(data);
+                break;
+        }
+
+    }
+
+    private void onLoadFinishedECBDailyLoader(DataFromServerDTO data){
+        if(data.getResponseCode()==200) {
+            try {
+                BufferedReader br = data.getBody();
+                String line;
+
+//                while((line = br.readLine()) != null){
+//                    System.out.println(line);
+//                }
+                System.out.println("//////////////////////");
+              for (int i = 0; i < 7; i++) {
+                  br.readLine();
+              }
+              parseAndSaveDailyData(br);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
+            setLastUpdateDate();
+            Toast.makeText(this, R.string.exchange_rates_updated, Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this, R.string.exchange_rates_update_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void onLoadFinishedECB90DaysLoader(DataFromServerDTO data){
+        if(data.getResponseCode()==200) {
+            try {
+                BufferedReader br = data.getBody();
+                String line;
+                StringBuilder stringBuilder = new StringBuilder(br.readLine());
+                System.out.println("/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////");
+                parse90DaysData(stringBuilder.delete(0,299));
+                stringBuilder.setLength(0);
+                while((line = br.readLine()) != null){
+                    stringBuilder.append(line);
+                    parse90DaysData(stringBuilder);
+                    stringBuilder.setLength(0);
+                }
+
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
+            setLastUpdateDate();
+            Toast.makeText(this, R.string.exchange_rates_updated, Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this, R.string.exchange_rates_update_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void parse90DaysData(StringBuilder stringBuilder){
+        //////////////////
+ //       Pattern p = Pattern.compile("\"([^\"]*)\"");
+//        Matcher m = p.matcher(stringBuilder);
+//        while (m.find()) {
+//            System.out.println(m.group(1));
+//        }
+        ////////////////
+        HistoricDataDTO data = new HistoricDataDTO();
+        //set date
+        data.setDate(stringBuilder.substring(12,22));
+        System.out.print(data.getDate());
+        data.setEUR("1");
+
+        //get first value (USD)
+        stringBuilder.delete(0,51);
+        int endOfDollarRate = stringBuilder.indexOf("\"");
+        System.out.print(" "+stringBuilder.substring(0,endOfDollarRate));
+        stringBuilder.delete(0,endOfDollarRate+30);
+
+        //All values between the first and the last;
+        for (int i = 0; i<29;i++) {
+            int indexOfNextQuote = stringBuilder.indexOf("\"");
+            System.out.print(" " + stringBuilder.substring(0, indexOfNextQuote));
+            stringBuilder.delete(0, indexOfNextQuote + 30);
+        }
+        //get final value (ZAR)
+        int indexOfFinalQuote = stringBuilder.indexOf("\"");
+        System.out.print(" "+"final: " + stringBuilder.substring(0, indexOfFinalQuote));
+
+        System.out.println();
+    }
+
+    private  void parseAndSaveDailyData(BufferedReader br) throws IOException {
+
         SharedPreferences.Editor editor = sharedPreferences.edit();
         String line = br.readLine();
         String date = line.substring(14, 24);
@@ -264,21 +376,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         String symbol;
         String rate;
         for (int i = 0; i < 31; i++) {
-            System.out.println(br.toString());
             line = br.readLine();
             remaining = line.substring(19);
             symbol = remaining.substring(0,3);
             rate = remaining.substring(11, remaining.length()-3);
+            System.out.println("symbol: "+symbol+" rate: "+rate);
             editor.putString(symbol, rate);
 
         }
         System.out.println("data refreshed");
         editor.commit();
         br.close();
-
     }
 
-  @Override
-  public void onLoaderReset(Loader<DataFromServerDTO> loader) {
-  }
+    @Override
+    public void onLoaderReset(Loader<DataFromServerDTO> loader) {
+    }
 }

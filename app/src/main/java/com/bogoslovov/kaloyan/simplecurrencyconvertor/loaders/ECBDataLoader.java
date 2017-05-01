@@ -15,45 +15,48 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.ECB_DAILY_URL;
-
 /**
  * Created by Kaloyan on 15.11.2016 г..
  */
 
 public class ECBDataLoader extends AsyncTaskLoader<DataFromServerDTO> {
 
+    String url;
+    public ECBDataLoader(Context context) {
+        super(context);
+    }
 
-  public ECBDataLoader(Context context) {
-      super(context);
-  }
+    public ECBDataLoader(Context context, String url) {
+        super(context);
+        this.url = url;
+    }
 
-  @Override
-  protected void onStartLoading() {
+    @Override
+    protected void onStartLoading() {
         super.onStartLoading();
         forceLoad();
-  }
+    }
 
-  @Override
-  public DataFromServerDTO loadInBackground() {
+    @Override
+    public DataFromServerDTO loadInBackground() {
 
-      DataFromServerDTO data=null;
-      try {
-          OkHttpClient client = new OkHttpClient();
-          Request request = new Request.Builder().url(ECB_DAILY_URL).build();
-          Response response = client.newCall(request).execute();
-          InputStream is = new ByteArrayInputStream(response.body().bytes());
-          InputStreamReader inputStreamReader  = new InputStreamReader(is);
-          BufferedReader body = new BufferedReader(inputStreamReader);
-          int responseCode = response.code();
-          data = new DataFromServerDTO();
-          data.setBody(body);
-          data.setResponseCode(responseCode);
-      } catch (IOException e) {
-          e.printStackTrace();
-      }
+        DataFromServerDTO data=null;
+        try {
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder().url(url).build();
+            Response response = client.newCall(request).execute();
+            InputStream is = new ByteArrayInputStream(response.body().bytes());
+            InputStreamReader inputStreamReader  = new InputStreamReader(is);
+            BufferedReader body = new BufferedReader(inputStreamReader);
+            int responseCode = response.code();
+            data = new DataFromServerDTO();
+            data.setBody(body);
+            data.setResponseCode(responseCode);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-      return data;
-  }
+        return data;
+    }
 
 }

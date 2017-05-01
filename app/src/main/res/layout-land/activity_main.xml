@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.bogoslovov.kaloyan.simplecurrencyconvertor.activities.MainActivity"
-    android:id="@+id/activity_main"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center_vertical"
-    android:padding="32dp"
-    android:background="@xml/background">
+              xmlns:tools="http://schemas.android.com/tools"
+              tools:context="com.bogoslovov.kaloyan.simplecurrencyconvertor.activities.MainActivity"
+              android:id="@+id/activity_main"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:gravity="center_vertical"
+              android:padding="32dp"
+              android:background="@xml/background">
 
     <LinearLayout
         android:orientation="horizontal"
@@ -66,6 +66,15 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             style="@style/Button" />
+
+        <Button
+            android:id = "@+id/show_chart_button"
+            style="@style/Button"
+            android:text="show chart"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            />
 
         <TextView
             android:text="@string/default_update_value"
