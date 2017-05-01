@@ -15,7 +15,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.ECB_URL;
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.ECB_DAILY_URL;
 
 /**
  * Created by Kaloyan on 15.11.2016 г..
@@ -40,7 +40,7 @@ public class ECBDataLoader extends AsyncTaskLoader<DataFromServerDTO> {
       DataFromServerDTO data=null;
       try {
           OkHttpClient client = new OkHttpClient();
-          Request request = new Request.Builder().url(ECB_URL).build();
+          Request request = new Request.Builder().url(ECB_DAILY_URL).build();
           Response response = client.newCall(request).execute();
           InputStream is = new ByteArrayInputStream(response.body().bytes());
           InputStreamReader inputStreamReader  = new InputStreamReader(is);
