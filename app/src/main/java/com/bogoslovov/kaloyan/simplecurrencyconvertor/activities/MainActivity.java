@@ -27,6 +27,7 @@ import com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters.SpinnerAdapter;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbOpenHelper;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.HistoricDataDTO;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBDataLoader;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if (getSupportActionBar()!=null) {
             getSupportActionBar().setElevation(0f);
         }
+        new HistoricalDataDbOpenHelper(getApplicationContext());
     }
 
     private void checkForConnection(){
