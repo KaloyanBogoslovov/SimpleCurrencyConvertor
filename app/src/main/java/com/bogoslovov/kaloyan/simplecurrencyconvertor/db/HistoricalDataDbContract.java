@@ -1,6 +1,7 @@
 package com.bogoslovov.kaloyan.simplecurrencyconvertor.db;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
@@ -25,6 +26,10 @@ public class HistoricalDataDbContract {
 
         public static final String CONTENT_ITEM_TYPE =
             ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_HISTORICAL_DATA;
+
+        public static Uri buildHistoricalDataUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
 
 
         public static final String TABLE_NAME = "historicaldata";

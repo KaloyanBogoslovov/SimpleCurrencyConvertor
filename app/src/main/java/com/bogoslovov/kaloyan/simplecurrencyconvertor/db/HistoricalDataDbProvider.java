@@ -4,6 +4,7 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,15 +27,11 @@ public class HistoricalDataDbProvider extends ContentProvider{
         return matcher;
     }
 
-
-
     @Override
     public boolean onCreate() {
         db = new HistoricalDataDbOpenHelper(getContext());
         return true;
     }
-
-
 
     @Nullable
     @Override
@@ -78,16 +75,72 @@ public class HistoricalDataDbProvider extends ContentProvider{
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
-        return null;
+        final int match = uriMatcher.match(uri);
+        Uri returnUri;
+
+        switch (match) {
+            case HISTORICAL_DATA: {
+                long _id = db.getWritableDatabase().insert(HistoricalDataDbContract.HistoricalDataEntry.TABLE_NAME, null, values);
+                if ( _id > 0 )
+                    returnUri = HistoricalDataDbContract.HistoricalDataEntry.buildHistoricalDataUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return returnUri;
     }
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        final int match = uriMatcher.match(uri);
+        int rowsDeleted;
+        if (null == selection) selection = "1";
+        switch (match) {
+            case HISTORICAL_DATA:
+                rowsDeleted = db.getWritableDatabase().delete(
+                    HistoricalDataDbContract.HistoricalDataEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        if (rowsDeleted != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsDeleted;
     }
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
         return 0;
+    }
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        final SQLiteDatabase database = db.getWritableDatabase();
+        final int match = uriMatcher.match(uri);
+        switch (match) {
+            case HISTORICAL_DATA:
+                database.beginTransaction();
+                int returnCount = 0;
+                try {
+                    for (ContentValues value : values) {
+                        long _id = database.insert(HistoricalDataDbContract.HistoricalDataEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            returnCount++;
+                        }
+                    }
+                    database.setTransactionSuccessful();
+                } finally {
+                    database.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return returnCount;
+            default:
+                return super.bulkInsert(uri, values);
+        }
     }
 }
