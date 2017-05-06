@@ -31,7 +31,6 @@ public class HistoricalDataDbContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-
         public static final String TABLE_NAME = "historicaldata";
     }
 }

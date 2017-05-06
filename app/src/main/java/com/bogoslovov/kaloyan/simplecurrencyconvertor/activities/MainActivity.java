@@ -1,11 +1,13 @@
 package com.bogoslovov.kaloyan.simplecurrencyconvertor.activities;
 
-import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -27,13 +29,14 @@ import com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters.SpinnerAdapter;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbOpenHelper;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbContract;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.HistoricDataDTO;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBDataLoader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.BOTTOM_SPINNER;
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.TOP_SPINNER;
@@ -51,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkForConnection();
-        checkIfSharedPreferenceExists(this);
+        checkIfSharedPreferenceExists();
         initSpinners();
         initSwapButton();
         initShowChartButton();
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if (getSupportActionBar()!=null) {
             getSupportActionBar().setElevation(0f);
         }
-        new HistoricalDataDbOpenHelper(getApplicationContext());
+
     }
 
     private void checkForConnection(){
@@ -91,8 +94,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         lastUpdate.setText(date);
     }
 
-    private void checkIfSharedPreferenceExists(Activity activity) {
-        sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
+    private void checkIfSharedPreferenceExists() {
+        sharedPreferences = getPreferences(Context.MODE_PRIVATE);
         if (!sharedPreferences.contains("EUR")) {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString("EUR", "1");
@@ -285,12 +288,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if(data.getResponseCode()==200) {
             try {
                 BufferedReader br = data.getBody();
-                String line;
-
-//                while((line = br.readLine()) != null){
-//                    System.out.println(line);
-//                }
-                System.out.println("//////////////////////");
               for (int i = 0; i < 7; i++) {
                   br.readLine();
               }
@@ -304,67 +301,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }else{
             Toast.makeText(this, R.string.exchange_rates_update_failed, Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void onLoadFinishedECB90DaysLoader(DataFromServerDTO data){
-        if(data.getResponseCode()==200) {
-            try {
-                BufferedReader br = data.getBody();
-                String line;
-                StringBuilder stringBuilder = new StringBuilder(br.readLine());
-                System.out.println("/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////");
-                parse90DaysData(stringBuilder.delete(0,299));
-                stringBuilder.setLength(0);
-                while((line = br.readLine()) != null){
-                    stringBuilder.append(line);
-                    parse90DaysData(stringBuilder);
-                    stringBuilder.setLength(0);
-                }
-
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
-            setLastUpdateDate();
-            Toast.makeText(this, R.string.exchange_rates_updated, Toast.LENGTH_SHORT).show();
-        }else{
-            Toast.makeText(this, R.string.exchange_rates_update_failed, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void parse90DaysData(StringBuilder stringBuilder){
-        //////////////////
- //       Pattern p = Pattern.compile("\"([^\"]*)\"");
-//        Matcher m = p.matcher(stringBuilder);
-//        while (m.find()) {
-//            System.out.println(m.group(1));
-//        }
-        ////////////////
-        HistoricDataDTO data = new HistoricDataDTO();
-        //set date
-        data.setDate(stringBuilder.substring(12,22));
-        System.out.print(data.getDate());
-        data.setEUR("1");
-
-        //get first value (USD)
-        stringBuilder.delete(0,51);
-        int endOfDollarRate = stringBuilder.indexOf("\"");
-        System.out.print(" "+stringBuilder.substring(0,endOfDollarRate));
-        stringBuilder.delete(0,endOfDollarRate+30);
-
-        //All values between the first and the last;
-        for (int i = 0; i<29;i++) {
-            int indexOfNextQuote = stringBuilder.indexOf("\"");
-            System.out.print(" " + stringBuilder.substring(0, indexOfNextQuote));
-            stringBuilder.delete(0, indexOfNextQuote + 30);
-        }
-        //get final value (ZAR)
-        int indexOfFinalQuote = stringBuilder.indexOf("\"");
-        System.out.print(" "+"final: " + stringBuilder.substring(0, indexOfFinalQuote));
-
-        System.out.println();
     }
 
     private  void parseAndSaveDailyData(BufferedReader br) throws IOException {
@@ -391,7 +327,121 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         br.close();
     }
 
+    private void onLoadFinishedECB90DaysLoader(DataFromServerDTO data){
+        if(data.getResponseCode()==200) {
+            try {
+                BufferedReader br = data.getBody();
+                String line;
+                List<ContentValues> contentValuesList = new ArrayList<>();
+                StringBuilder stringBuilder = new StringBuilder(br.readLine());
+
+                //parse first row, because it's unique
+                List<String> firstRow = parse90DaysData(stringBuilder.delete(0,299));
+
+                //add first row
+                contentValuesList.add(toContentValues(firstRow));
+
+                //prepare stringBuilder for next row
+                stringBuilder.setLength(0);
+
+                // parse and add to the list all remaining rows
+                while((line = br.readLine()) != null){
+                    stringBuilder.append(line);
+                    List<String> dataElement = parse90DaysData(stringBuilder);
+                    contentValuesList.add(toContentValues(dataElement));
+                    stringBuilder.setLength(0);
+                }
+
+                if (contentValuesList.size()>5){
+                    saveHistoricalDataToDB(contentValuesList);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
+            setLastUpdateDate();
+            Toast.makeText(this, R.string.exchange_rates_updated, Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this, R.string.exchange_rates_update_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private List<String> parse90DaysData(StringBuilder stringBuilder){
+
+        List<String> list = new ArrayList<String>();
+
+        //add date
+        list.add(stringBuilder.substring(12,22));
+
+        //add eur
+        list.add("1");
+
+        //get first value (USD)
+        stringBuilder.delete(0,51);
+        int endOfDollarRate = stringBuilder.indexOf("\"");
+
+        list.add(stringBuilder.substring(0,endOfDollarRate));
+        //System.out.print(" "+stringBuilder.substring(0,endOfDollarRate));
+        stringBuilder.delete(0,endOfDollarRate+30);
+
+        //All values between the first and the last;
+        for (int i = 0; i<29;i++) {
+            int indexOfNextQuote = stringBuilder.indexOf("\"");
+           // System.out.print(" " + stringBuilder.substring(0, indexOfNextQuote));
+
+            //add currency value to list
+            list.add(stringBuilder.substring(0, indexOfNextQuote));
+
+            stringBuilder.delete(0, indexOfNextQuote + 30);
+        }
+        //get final value (ZAR)
+        int indexOfFinalQuote = stringBuilder.indexOf("\"");
+        //System.out.print(" "+"final: " + stringBuilder.substring(0, indexOfFinalQuote));
+        //add zar value to list
+        list.add(stringBuilder.substring(0, indexOfFinalQuote));
+
+        //System.out.println();
+
+        return list;
+    }
+
+    private void saveHistoricalDataToDB(List<ContentValues> contentValuesList){
+        ContentValues[] contentValuesArray = contentValuesList.toArray(new ContentValues[contentValuesList.size()]);
+
+        ContentResolver contentResolver = getContentResolver();
+        contentResolver.delete(HistoricalDataDbContract.HistoricalDataEntry.CONTENT_URI,null,null);
+        contentResolver.bulkInsert(HistoricalDataDbContract.HistoricalDataEntry.CONTENT_URI,contentValuesArray);
+        testDB(contentResolver);
+    }
+
+    private void testDB(ContentResolver contentResolver){
+        Cursor cursor = contentResolver.query(HistoricalDataDbContract.HistoricalDataEntry.CONTENT_URI,null,null,null,null);
+
+        while (cursor.moveToNext()){
+            String date = cursor.getString(cursor.getColumnIndex("DATE"));
+            String huf = cursor.getString(cursor.getColumnIndex("HUF"));
+            String zar = cursor.getString(cursor.getColumnIndex("ZAR"));
+            System.out.println("Date: "+date+" HUF: "+huf+" ZAR: "+zar);
+        }
+        cursor.close();
+    }
+
     @Override
     public void onLoaderReset(Loader<DataFromServerDTO> loader) {
+    }
+
+    private ContentValues toContentValues(List<String> list){
+        ContentValues contentValues = new ContentValues();
+
+        String[] keys = {"DATE","EUR","USD","JPY","BGN","CZK","DKK","GBP","HUF","PLN","RON",
+            "SEK","CHF","NOK","HRK","RUB","TRY","AUD","BRL","CAD","CNY","HKD",
+            "IDR","ILS","INR","KRW","MXN","MYR","NZD","PHP","SGD","THB","ZAR"};
+
+        for (int i=0;i<keys.length;i++){
+            contentValues.put(keys[i],list.get(i));
+        }
+
+        return contentValues;
     }
 }

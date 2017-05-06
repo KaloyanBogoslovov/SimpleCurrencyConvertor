@@ -18,7 +18,7 @@ import java.nio.charset.Charset;
 
 public class HistoricalDataDbOpenHelper extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 5;
     private static final String DATABASE_NAME = "historical_data.db";
     private Context context;
 
