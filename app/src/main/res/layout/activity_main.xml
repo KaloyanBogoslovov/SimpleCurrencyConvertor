@@ -43,17 +43,24 @@
             android:layout_width="match_parent"
             android:layout_marginBottom="16dp"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
         <Button
             android:id = "@+id/swap_button"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             style="@style/Button" />
 
         <Button
             android:id = "@+id/show_chart_button"
-            android:layout_width="match_parent"
             style="@style/Button"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:text="show chart"/>
-
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout

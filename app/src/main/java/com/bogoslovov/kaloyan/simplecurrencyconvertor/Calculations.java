@@ -35,7 +35,7 @@ public class Calculations {
         }
     }
 
-    private String getSpinnerValue(String spinner){
+    public String getSpinnerValue(String spinner){
 
         switch (spinner){
             case"EUR Euro": return "EUR";

@@ -19,11 +19,13 @@ public class HistoricalDataDbProvider extends ContentProvider{
     private HistoricalDataDbOpenHelper db;
 
     private static final int HISTORICAL_DATA = 100;
+    private static final int CHART_DATA = 101;
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = HistoricalDataDbContract.CONTENT_AUTHORITY;
         matcher.addURI(authority,HistoricalDataDbContract.PATH_HISTORICAL_DATA, HISTORICAL_DATA);
+        matcher.addURI(authority,HistoricalDataDbContract.PATH_HISTORICAL_DATA+"/*"+"/*", CHART_DATA);
         return matcher;
     }
 
@@ -51,6 +53,18 @@ public class HistoricalDataDbProvider extends ContentProvider{
                 );
                 break;
 
+            case CHART_DATA:
+                String[] currenciesAndDatesColumns = HistoricalDataDbContract.HistoricalDataEntry.getCurrenciesAndDatesForChart(uri);
+                cursor = db.getReadableDatabase().query(
+                    HistoricalDataDbContract.HistoricalDataEntry.TABLE_NAME,
+                    currenciesAndDatesColumns,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+                );
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -65,6 +79,8 @@ public class HistoricalDataDbProvider extends ContentProvider{
 
         switch (match) {
             case HISTORICAL_DATA:
+                return HistoricalDataDbContract.HistoricalDataEntry.CONTENT_TYPE;
+            case CHART_DATA:
                 return HistoricalDataDbContract.HistoricalDataEntry.CONTENT_TYPE;
 
             default:

@@ -356,6 +356,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     saveHistoricalDataToDB(contentValuesList);
                 }
 
+                Intent intent = new Intent(MainActivity.this, ChartActivity.class);
+                intent.putExtra(Constants.FIRST_CURRENCY,calculations.getSpinnerValue(topSpinnerValue));
+                intent.putExtra(Constants.SECOND_CURRENCY,calculations.getSpinnerValue(bottomSpinnerValue));
+                startActivity(intent);
             } catch (IOException e) {
                 e.printStackTrace();
             }

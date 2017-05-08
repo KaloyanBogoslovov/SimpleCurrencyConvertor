@@ -31,6 +31,17 @@ public class HistoricalDataDbContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
+        public static Uri buildChartDataUri(String currency, String secondCurrency){
+            return CONTENT_URI.buildUpon().appendPath(currency).appendPath(secondCurrency).build();
+        }
+
+        public static String[] getCurrenciesAndDatesForChart(Uri uri){
+            String firstCompany = uri.getPathSegments().get(1);
+            String secondCompany = uri.getPathSegments().get(2);
+            String[] currenciesAndDates = {firstCompany,secondCompany,"DATE"};
+            return currenciesAndDates;
+        }
+
         public static final String TABLE_NAME = "historicaldata";
     }
 }
