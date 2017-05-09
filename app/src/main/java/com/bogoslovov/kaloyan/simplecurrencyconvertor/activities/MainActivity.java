@@ -47,13 +47,19 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final int ECB_90_DAYS_LOADER  = 2;
     private static String bottomSpinnerValue ="";
     private static String topSpinnerValue ="";
+    private static int topSpinnerSelection=0;
+    private static int bottomSpinnerSelection = 1;
     private SharedPreferences sharedPreferences;
+    private EditText editTextTop;
+    private EditText editTextBottom;
+    private Spinner spinnerBottom;
+    private Spinner spinnerTop;
     private Calculations calculations = new Calculations(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        checkForConnection();
+        checkForConnection(ECB_DAILY_LOADER);
         checkIfSharedPreferenceExists();
         initSpinners();
         initSwapButton();
@@ -66,13 +72,42 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     }
 
-    private void checkForConnection(){
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("top-spinner-selection",topSpinnerSelection);
+        outState.putInt("bottom-spinner-selection",bottomSpinnerSelection);
+        outState.putString("top-edit-text-value", editTextTop.getText().toString());
+        outState.putString("bottom-edit-text-value",editTextBottom.getText().toString());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        bottomSpinnerSelection = savedInstanceState.getInt("bottom-spinner-selection");
+        topSpinnerSelection = savedInstanceState.getInt("top-spinner-selection");
+        spinnerBottom.setSelection(bottomSpinnerSelection);
+        spinnerTop.setSelection(topSpinnerSelection);
+        editTextTop.setText(savedInstanceState.getString("top-edit-text-value"));
+        editTextBottom.setText(savedInstanceState.getString("bottom-edit-text-value"));
+    }
+
+    private void checkForConnection(int loader){
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()) {
-            startLoader(ECB_DAILY_LOADER);
+            startLoader(loader);
         }else{
-            setLastUpdateDate();
+            if (loader==ECB_DAILY_LOADER){
+                setLastUpdateDate();
+            }else if (loader ==ECB_90_DAYS_LOADER){
+                //todo check if db is empty
+                Intent intent = new Intent(MainActivity.this, ChartActivity.class);
+                intent.putExtra(Constants.FIRST_CURRENCY,calculations.getSpinnerValue(topSpinnerValue));
+                intent.putExtra(Constants.SECOND_CURRENCY,calculations.getSpinnerValue(bottomSpinnerValue));
+                startActivity(intent);
+            }
         }
     }
 
@@ -173,18 +208,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         showChartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkForConnection(ECB_90_DAYS_LOADER);
 
-                startLoader(ECB_90_DAYS_LOADER);
-                //temporary///
-//                Intent intent = new Intent (MainActivity.this,ChartActivity.class);
-//                startActivity(intent);
             }
         });
     }
 
     private void initEditTextFields() {
-        final EditText editTextTop = (EditText) findViewById(R.id.edit_text_top);
-        final EditText editTextBottom = (EditText) findViewById(R.id.edit_text_bottom);
+        editTextTop = (EditText) findViewById(R.id.edit_text_top);
+        editTextBottom = (EditText) findViewById(R.id.edit_text_bottom);
 
         editTextTop.setText("1");
         editTextTop.addTextChangedListener(new TextWatcher() {
@@ -231,14 +263,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private void initSpinners(){
         Constants constants = new Constants();
         final SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, R.layout.spinner_row,constants.currencies,constants.images);
-        Spinner spinnerBottom = (Spinner) findViewById(R.id.spinner_bottom);
-        Spinner spinnerTop = (Spinner) findViewById(R.id.spinner_top);
+        spinnerBottom = (Spinner) findViewById(R.id.spinner_bottom);
+        spinnerTop = (Spinner) findViewById(R.id.spinner_top);
+        spinnerTop.setSelection(topSpinnerSelection);
         spinnerTop.setAdapter(spinnerAdapter);
         spinnerBottom.setAdapter(spinnerAdapter);
-        spinnerBottom.setSelection(1);
+        spinnerBottom.setSelection(bottomSpinnerSelection);
         spinnerTop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 topSpinnerValue = spinnerAdapter.getItem(position);
+                topSpinnerSelection = position;
                 calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
             }
             public void onNothingSelected(AdapterView<?> adapterView) {}
@@ -246,6 +280,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         spinnerBottom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 bottomSpinnerValue = spinnerAdapter.getItem(position);
+                bottomSpinnerSelection = position;
                 calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
             }
             public void onNothingSelected(AdapterView<?> adapterView) {}

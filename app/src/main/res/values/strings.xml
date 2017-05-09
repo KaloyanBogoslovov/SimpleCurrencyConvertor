@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Simple Currency Convertor</string>
+    <string name="app_name">Currency Converter</string>
     <string name="action_about">About</string>
     <string name="button_name">Swap currencies</string>
     <string name="default_update_value">Last update: 2016-11-18</string>
