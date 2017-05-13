@@ -205,8 +205,9 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
         }
 
         LineDataSet dataSet = new LineDataSet(entries, "Label"); // add entries to dataset
-        dataSet.setColor(Color.parseColor("#ffffff"));
-        dataSet.setValueTextColor(Color.parseColor("#ffffff"));
+        int white  = Color.parseColor("#ffffff");
+        dataSet.setColor(white);
+        dataSet.setValueTextColor(white);
 
         LineData lineData = new LineData(dataSet);
         chart.setData(lineData);
@@ -222,6 +223,11 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
         xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
         xAxis.setValueFormatter(formatter);
         chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        chart.setDescription(null);
+        chart.getLegend().setEnabled(false);
+        chart.getAxisLeft().setTextColor(white);
+        chart.getAxisRight().setTextColor(white);
+        chart.getXAxis().setTextColor(white);
         chart.setVisibleXRangeMaximum(16);
         chart.moveViewToX(44);
         chart.invalidate(); // refresh

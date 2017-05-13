@@ -31,6 +31,7 @@ import com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters.SpinnerAdapter;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbContract;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.fragments.LoadingFragment;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBDataLoader;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.xmlparser.XMLParser;
 
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private Spinner spinnerBottom;
     private Spinner spinnerTop;
     private XMLParser xmlParser;
+    private LoadingFragment loadingFragment;
     private Calculations calculations = new Calculations(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -296,16 +298,26 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         ECBDataLoader loader = null;
         switch (loaderId){
             case ECB_DAILY_LOADER:
-                Toast.makeText(this, "daily", Toast.LENGTH_SHORT).show();
+                showLoading();
                 loader = new ECBDataLoader(this,Constants.ECB_DAILY_URL);
                 break;
 
             case ECB_90_DAYS_LOADER:
-                Toast.makeText(this, "90 days loader", Toast.LENGTH_SHORT).show();
+                showLoading();
                 loader = new ECBDataLoader(this,Constants.ECB_90_DAYS_URL);
                 break;
         }
         return loader;
+    }
+
+    private void showLoading(){
+        loadingFragment = new LoadingFragment();
+        loadingFragment.show(getSupportFragmentManager(), Constants.TAG_FRAGMENT);
+        loadingFragment.setCancelable(false);
+    }
+
+    private void dismissLoading(){
+        loadingFragment.dismiss();
     }
 
     @Override
@@ -335,8 +347,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
             calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
             setLastUpdateDate();
+            dismissLoading();
             Toast.makeText(this, R.string.exchange_rates_updated, Toast.LENGTH_SHORT).show();
         }else{
+            dismissLoading();
             Toast.makeText(this, R.string.exchange_rates_update_failed, Toast.LENGTH_SHORT).show();
         }
     }
@@ -371,7 +385,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 if (contentValuesList.size()>5){
                     saveHistoricalDataToDB(contentValuesList);
                 }
-
+                dismissLoading();
+                Toast.makeText(this, R.string.charts_data_updated, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(MainActivity.this, ChartActivity.class);
                 intent.putExtra(Constants.FIRST_CURRENCY,calculations.getSpinnerValue(topSpinnerValue));
                 intent.putExtra(Constants.SECOND_CURRENCY,calculations.getSpinnerValue(bottomSpinnerValue));
@@ -379,11 +394,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
-            setLastUpdateDate();
-            Toast.makeText(this, R.string.exchange_rates_updated, Toast.LENGTH_SHORT).show();
         }else{
-            Toast.makeText(this, R.string.exchange_rates_update_failed, Toast.LENGTH_SHORT).show();
+            dismissLoading();
+            Toast.makeText(this, R.string.charts_data_update_failed, Toast.LENGTH_SHORT).show();
         }
     }
 

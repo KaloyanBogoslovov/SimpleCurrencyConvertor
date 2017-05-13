@@ -8,4 +8,7 @@
     <string name="data_source_information">  The application uses data from the European central bank website.</string>
     <string name="exchange_rates_updated">Exchange rates updated</string>
     <string name="exchange_rates_update_failed">Exchange rates not updated. Try again later</string>
+    <string name="charts_data_updated">Charts data updated</string>
+    <string name="charts_data_update_failed">Charts data not updated. Try again later</string>
+    <string name="please_wait">Please wait</string>
 </resources>

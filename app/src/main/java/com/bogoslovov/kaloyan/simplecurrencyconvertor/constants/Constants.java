@@ -13,6 +13,7 @@ public class Constants {
     public static final String BOTTOM_SPINNER="bottom";
     public static final String FIRST_CURRENCY = "first-currency";
     public static final String SECOND_CURRENCY = "second-currency";
+    public static final String TAG_FRAGMENT = "tag";
 
     public final String [] currencies={"EUR Euro", "USD US dollar", "JPY Japanese yen", "BGN Bulgarian lev", "CZK Czech koruna",
         "DKK Danish krone", "GBP Pound sterling", "HUF Hungarian forint", "PLN Polish zloty", "RON Romanian leu",
