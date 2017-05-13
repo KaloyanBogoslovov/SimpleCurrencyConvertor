@@ -6,13 +6,22 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ImageButton;
+import android.widget.Spinner;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters.SpinnerAdapter;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbContract;
 import com.github.mikephil.charting.charts.LineChart;
@@ -35,7 +44,8 @@ import java.util.List;
 public class ChartActivity extends AppCompatActivity  implements LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final int GET_CHART_DATA = 4;
-
+    private static String firstCurrency = "";
+    private static String secondCurrency = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,13 +53,20 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_chart);
-        Intent intent = getIntent();
-        Bundle currencies = new Bundle();
-        currencies.putString(Constants.FIRST_CURRENCY,intent.getStringExtra(Constants.FIRST_CURRENCY));
-        currencies.putString(Constants.SECOND_CURRENCY,intent.getStringExtra(Constants.SECOND_CURRENCY));
-        startLoader(currencies);
 
+        Intent intent = getIntent();
+        firstCurrency = intent.getStringExtra(Constants.FIRST_CURRENCY);
+        secondCurrency= intent.getStringExtra(Constants.SECOND_CURRENCY);
+
+        Bundle currencies = new Bundle();
+        currencies.putString(Constants.FIRST_CURRENCY,firstCurrency);
+        currencies.putString(Constants.SECOND_CURRENCY,secondCurrency);
+        startLoader(currencies);
+        setUpToolbar();
+        initSpinners();
+        initSwapButton();
     }
+
 
     private void startLoader(Bundle bundle){
         LoaderManager loaderManager = getLoaderManager();
@@ -62,6 +79,96 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
         }
     }
 
+    private void setUpToolbar(){
+        Toolbar toolbar = (Toolbar) findViewById(R.id.chart_toolbar);
+        toolbar.setTitle("");
+        setSupportActionBar(toolbar);
+
+        final Drawable upArrow = ContextCompat.getDrawable(this, R.drawable.abc_ic_ab_back_material);
+        upArrow.setColorFilter(ContextCompat.getColor(this, R.color.white), PorterDuff.Mode.SRC_ATOP);
+        getSupportActionBar().setHomeAsUpIndicator(upArrow);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ChartActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void initSpinners(){
+        Constants constants = new Constants();
+        final SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, R.layout.spinner_row,constants.currencyTags,constants.images);
+        Spinner secondCurrencySpinner = (Spinner) findViewById(R.id.chart_second_currency);
+        Spinner firstCurrencySpinner = (Spinner) findViewById(R.id.chart_first_currency);
+        firstCurrencySpinner.setAdapter(spinnerAdapter);
+        secondCurrencySpinner.setAdapter(spinnerAdapter);
+        firstCurrencySpinner.setSelection(getObjectNumber(constants.currencyTags, firstCurrency));
+        secondCurrencySpinner.setSelection(getObjectNumber(constants.currencyTags,secondCurrency));
+
+        firstCurrencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                firstCurrency = spinnerAdapter.getItem(position);
+                Bundle currencies = new Bundle();
+                currencies.putString(Constants.FIRST_CURRENCY,firstCurrency);
+                currencies.putString(Constants.SECOND_CURRENCY,secondCurrency);
+                startLoader(currencies);
+                System.out.println("firstcurrecnylistener");
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        secondCurrencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                secondCurrency = spinnerAdapter.getItem(position);
+                Bundle currencies = new Bundle();
+                currencies.putString(Constants.FIRST_CURRENCY,firstCurrency);
+                currencies.putString(Constants.SECOND_CURRENCY,secondCurrency);
+                startLoader(currencies);
+                System.out.println("secondcurrencylistener");
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+    }
+
+    private void initSwapButton(){
+        ImageButton swapButton = (ImageButton) findViewById(R.id.chart_swap_currencies);
+        swapButton.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View view) {
+                Spinner secondCurrencySpinner = (Spinner) findViewById(R.id.chart_second_currency);
+                Spinner firstCurrencySpinner = (Spinner) findViewById(R.id.chart_first_currency);
+                int position = secondCurrencySpinner.getSelectedItemPosition();
+                secondCurrencySpinner.setSelection(firstCurrencySpinner.getSelectedItemPosition());
+                firstCurrencySpinner.setSelection(position);
+
+            }
+        });
+    }
+
+    private int getObjectNumber(String[]currencies, String currency){
+        int number = 0;
+        for (int i=0; i<currencies.length; i++){
+            if (currencies[i].equals(currency)){
+                return i;
+            }
+        }
+        return number;
+    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle currencies) {
@@ -80,7 +187,7 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
             exchangeRatesList.add(Float.parseFloat(exchangeRate.toPlainString()));
         }
         for(int i = 0; i<datesList.size(); i++){
-            System.out.println(datesList.get(i)+"  "+exchangeRatesList.get(i));
+           // System.out.println(datesList.get(i)+"  "+exchangeRatesList.get(i));
         }
         Collections.reverse(datesList);
         Collections.reverse(exchangeRatesList);
@@ -93,7 +200,7 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
         float order = 0f;
         for (int i = 0; i< exchangeRatesList.size(); i++){
             entries.add(new Entry(order,exchangeRatesList.get(i)));
-            System.out.println(exchangeRatesList.get(i).floatValue());
+           // System.out.println(exchangeRatesList.get(i).floatValue());
             order++;
         }
 

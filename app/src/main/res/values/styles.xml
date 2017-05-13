@@ -10,6 +10,15 @@
         <item name="colorPrimaryDark">@color/test</item>
     </style>
 
+    <style name="AppThemeNoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="android:dropDownListViewStyle">@style/SpinnerStyle</item>
+        <item name="colorButtonNormal">@android:color/holo_orange_dark</item>
+        <item name="colorAccent">@android:color/holo_orange_dark</item>
+        <item name="colorPrimary">@color/test</item>
+        <item name="colorPrimaryDark">@color/test</item>
+    </style>
+
     <style name="AboutActivityEditTextStyle">
         <item name="android:fontFamily">sans-serif-condensed</item>
         <item name="android:textColor">#FFFFFF</item>

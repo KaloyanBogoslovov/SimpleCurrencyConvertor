@@ -30,9 +30,8 @@ public class Constants {
         R.drawable.mxn,R.drawable.myr,R.drawable.nzd,R.drawable.php,
         R.drawable.sgd,R.drawable.thb,R.drawable.zar};
 
-    //test data
-
-    public static String[] x = {"1.5","1.8","1.3","0.6","0.8","1.5","2","2.2","0.5","0.6","0.5","0.2"};
-    public static String[] y = {"3","3.5","3.4","3.6","2","1.5","1.6","1.3","1.4","0.5","0.1","0.5"};
+    public final String [] currencyTags = {"EUR","USD","JPY","BGN","CZK","DKK","GBP","HUF","PLN","RON",
+        "SEK","CHF","NOK","HRK","RUB","TRY","AUD","BRL","CAD","CNY","HKD",
+        "IDR","ILS","INR","KRW","MXN","MYR","NZD","PHP","SGD","THB","ZAR"};
 
 }

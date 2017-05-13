@@ -32,6 +32,7 @@ import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbContract;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBDataLoader;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.xmlparser.XMLParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private EditText editTextBottom;
     private Spinner spinnerBottom;
     private Spinner spinnerTop;
+    private XMLParser xmlParser;
     private Calculations calculations = new Calculations(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()) {
+            xmlParser = new XMLParser();
             startLoader(loader);
         }else{
             if (loader==ECB_DAILY_LOADER){
@@ -326,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
               for (int i = 0; i < 7; i++) {
                   br.readLine();
               }
-              parseAndSaveDailyData(br);
+              xmlParser.parseAndSaveDailyData(br,sharedPreferences);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -338,29 +341,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
     }
 
-    private  void parseAndSaveDailyData(BufferedReader br) throws IOException {
 
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        String line = br.readLine();
-        String date = line.substring(14, 24);
-        editor.putString("EUR", "1");
-        editor.putString("date",date);
-        String remaining;
-        String symbol;
-        String rate;
-        for (int i = 0; i < 31; i++) {
-            line = br.readLine();
-            remaining = line.substring(19);
-            symbol = remaining.substring(0,3);
-            rate = remaining.substring(11, remaining.length()-3);
-            System.out.println("symbol: "+symbol+" rate: "+rate);
-            editor.putString(symbol, rate);
-
-        }
-        System.out.println("data refreshed");
-        editor.commit();
-        br.close();
-    }
 
     private void onLoadFinishedECB90DaysLoader(DataFromServerDTO data){
         if(data.getResponseCode()==200) {
@@ -371,7 +352,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 StringBuilder stringBuilder = new StringBuilder(br.readLine());
 
                 //parse first row, because it's unique
-                List<String> firstRow = parse90DaysData(stringBuilder.delete(0,299));
+                List<String> firstRow = xmlParser.parse90Days(stringBuilder.delete(0,299));
 
                 //add first row
                 contentValuesList.add(toContentValues(firstRow));
@@ -382,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 // parse and add to the list all remaining rows
                 while((line = br.readLine()) != null){
                     stringBuilder.append(line);
-                    List<String> dataElement = parse90DaysData(stringBuilder);
+                    List<String> dataElement = xmlParser.parse90Days(stringBuilder);
                     contentValuesList.add(toContentValues(dataElement));
                     stringBuilder.setLength(0);
                 }
@@ -406,44 +387,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
     }
 
-    private List<String> parse90DaysData(StringBuilder stringBuilder){
 
-        List<String> list = new ArrayList<String>();
-
-        //add date
-        list.add(stringBuilder.substring(12,22));
-
-        //add eur
-        list.add("1");
-
-        //get first value (USD)
-        stringBuilder.delete(0,51);
-        int endOfDollarRate = stringBuilder.indexOf("\"");
-
-        list.add(stringBuilder.substring(0,endOfDollarRate));
-        //System.out.print(" "+stringBuilder.substring(0,endOfDollarRate));
-        stringBuilder.delete(0,endOfDollarRate+30);
-
-        //All values between the first and the last;
-        for (int i = 0; i<29;i++) {
-            int indexOfNextQuote = stringBuilder.indexOf("\"");
-           // System.out.print(" " + stringBuilder.substring(0, indexOfNextQuote));
-
-            //add currency value to list
-            list.add(stringBuilder.substring(0, indexOfNextQuote));
-
-            stringBuilder.delete(0, indexOfNextQuote + 30);
-        }
-        //get final value (ZAR)
-        int indexOfFinalQuote = stringBuilder.indexOf("\"");
-        //System.out.print(" "+"final: " + stringBuilder.substring(0, indexOfFinalQuote));
-        //add zar value to list
-        list.add(stringBuilder.substring(0, indexOfFinalQuote));
-
-        //System.out.println();
-
-        return list;
-    }
 
     private void saveHistoricalDataToDB(List<ContentValues> contentValuesList){
         ContentValues[] contentValuesArray = contentValuesList.toArray(new ContentValues[contentValuesList.size()]);
@@ -466,10 +410,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         cursor.close();
     }
 
-    @Override
-    public void onLoaderReset(Loader<DataFromServerDTO> loader) {
-    }
-
     private ContentValues toContentValues(List<String> list){
         ContentValues contentValues = new ContentValues();
 
@@ -482,5 +422,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
 
         return contentValues;
+    }
+
+    @Override
+    public void onLoaderReset(Loader<DataFromServerDTO> loader) {
     }
 }

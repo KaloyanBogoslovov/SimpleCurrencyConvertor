@@ -1,11 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@xml/background"
-    android:padding="16dp">
+    android:background="@xml/background">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/chart_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/test"
+        app:titleTextColor="@android:color/white">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_gravity="center">
+
+            <Spinner
+                android:id = "@+id/chart_first_currency"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:popupBackground="@xml/background"/>
+
+            <ImageButton
+                android:id="@+id/chart_swap_currencies"
+                android:gravity="center"
+                android:background="?android:attr/selectableItemBackground"
+                android:src = "@android:drawable/stat_notify_sync_noanim"
+                android:layout_height="50dp"
+                android:layout_width="50dp"/>
+
+            <Spinner android:id = "@+id/chart_second_currency"
+                     android:popupBackground="@xml/background"
+                     android:layout_width="match_parent"
+                     android:layout_height="50dp"/>
+
+        </LinearLayout>
+    </android.support.v7.widget.Toolbar>
 
     <com.github.mikephil.charting.charts.LineChart
+        android:layout_margin="16dp"
         android:id="@+id/chart"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
