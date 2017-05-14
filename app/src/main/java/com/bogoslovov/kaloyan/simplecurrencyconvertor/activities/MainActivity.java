@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -68,12 +69,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             String secondCurrency = intent.getStringExtra(Constants.SECOND_CURRENCY);
             topSpinnerSelection = Utils.getObjectNumber(Constants.currencyTags,firstCurrency);
             bottomSpinnerSelection = Utils.getObjectNumber(Constants.currencyTags, secondCurrency);
-            System.out.println("blablabla");
         }
         initSpinners();
         initSwapButton();
         initShowChartButton();
         initEditTextFields();
+
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         if (getSupportActionBar()!=null) {
             getSupportActionBar().setElevation(0f);
@@ -81,10 +82,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     }
 
+    private boolean onlineMode(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        boolean online = prefs.getBoolean("online-mode",true);
+        return online;
+    }
+
     private void checkForConnection(int loader){
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()) {
+        if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()&& onlineMode()) {
             xmlParser = new XMLParser();
             startLoader(loader);
         }else{
@@ -170,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.about,menu);
+        getMenuInflater().inflate(R.menu.activity_main_menus,menu);
         return true;
     }
 
@@ -184,6 +191,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             return true;
         }
 
+        if (id==R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 

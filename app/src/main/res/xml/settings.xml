@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <CheckBoxPreference
+        android:id="@+id/checkbox_preference"
+        android:title="@string/check_box_title"
+        android:key="@string/pref_check_box_key"
+        android:summaryOff="@string/check_box_summary_off"
+        android:summaryOn="@string/check_box_summary_on"
+        android:fontFamily="sans-serif-condensed"
+        android:defaultValue="true" />
+
+</PreferenceScreen>

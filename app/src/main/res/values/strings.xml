@@ -1,16 +1,32 @@
 <resources>
+    <!-- Application title -->
     <string name="app_name">Currency Converter</string>
+
+    <!-- Menu items -->
     <string name="action_about">About</string>
-    <string name="button_name">Swap currencies</string>
-    <string name="default_update_value">Last update: 2016-11-18</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Strings related to AboutActivity -->
     <string name="update_information"> • The basic exchange rates are updated every time the application is started, or the orientation of the device is changed.</string>
     <string name="update_charts_information"> • The charts data is updated every time the show chart button is pressed, if internet connection is available.</string>
     <string name="data_storage_information"> • The app stores the newest data locally, so it can be used without internet connection.</string>
     <string name="data_source_information"> • The application uses data from the European central bank website.</string>
+    <string name="ic_maker"> • Logo icon is designed by Freepik</string>
+
+    <!-- Strings related to MainActivity -->
+    <string name="button_name">Swap currencies</string>
+    <string name="default_update_value">Last update: 2016-11-18</string>
     <string name="exchange_rates_updated">Exchange rates updated</string>
     <string name="exchange_rates_update_failed">Exchange rates not updated. Try again later</string>
     <string name="charts_data_updated">Charts data updated</string>
     <string name="charts_data_update_failed">Charts data not updated. Try again later</string>
     <string name="please_wait">Please wait</string>
-    <string name="ic_maker"> • Logo icon is designed by Freepik</string>
+
+    <!-- String related to Settings -->
+    <string name="check_box_title">Online mode</string>
+    <string name="pref_check_box_key">online-mode</string>
+    <string name="check_box_summary_off">Not updating exchange data</string>
+    <string name="check_box_summary_on">Updating exchange data</string>
+
+
 </resources>
