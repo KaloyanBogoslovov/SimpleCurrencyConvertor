@@ -22,6 +22,7 @@ import android.widget.Spinner;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.Utils;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.ValueFormatter;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters.SpinnerAdapter;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbContract;
@@ -204,6 +205,7 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
         //dataSet.setValue;
 
         LineData lineData = new LineData(dataSet);
+        lineData.setValueFormatter(new ValueFormatter());
         chart.setData(lineData);
 
         IAxisValueFormatter formatter = new IAxisValueFormatter() {

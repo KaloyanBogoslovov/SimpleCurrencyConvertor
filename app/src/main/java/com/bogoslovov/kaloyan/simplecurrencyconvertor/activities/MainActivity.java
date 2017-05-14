@@ -90,12 +90,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }else{
             if (loader==ECB_DAILY_LOADER){
                 setLastUpdateDate();
-            }else if (loader ==ECB_90_DAYS_LOADER){
-                //todo check if db is empty
-                Intent intent = new Intent(MainActivity.this, ChartActivity.class);
-                intent.putExtra(Constants.FIRST_CURRENCY,calculations.getSpinnerValue(topSpinnerValue));
-                intent.putExtra(Constants.SECOND_CURRENCY,calculations.getSpinnerValue(bottomSpinnerValue));
-                startActivity(intent);
+            }else if (loader == ECB_90_DAYS_LOADER){
+                showChart();
             }
         }
     }
@@ -108,6 +104,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             loaderManager.initLoader(loaderToStart,null,this);
         }else{
             loaderManager.restartLoader(loaderToStart,null,this);
+        }
+    }
+
+    private void showChart(){
+        Cursor cursor = getContentResolver().query(HistoricalDataDbContract.HistoricalDataEntry.CONTENT_URI,null,null,null, null);
+        if (cursor.moveToFirst()) {
+            cursor.close();
+            Intent intent = new Intent(MainActivity.this, ChartActivity.class);
+            intent.putExtra(Constants.FIRST_CURRENCY,calculations.getSpinnerValue(topSpinnerValue));
+            intent.putExtra(Constants.SECOND_CURRENCY,calculations.getSpinnerValue(bottomSpinnerValue));
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "You need internet connection once, so you can get the data for the charts", Toast.LENGTH_SHORT).show();
+
         }
     }
 
