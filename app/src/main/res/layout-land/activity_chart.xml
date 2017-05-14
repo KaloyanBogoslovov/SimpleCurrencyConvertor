@@ -21,7 +21,7 @@
 
             <Spinner
                 android:id = "@+id/chart_first_currency"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:popupBackground="@xml/background"/>
 
@@ -33,10 +33,11 @@
                 android:layout_height="50dp"
                 android:layout_width="50dp"/>
 
-            <Spinner android:id = "@+id/chart_second_currency"
-                     android:popupBackground="@xml/background"
-                     android:layout_width="match_parent"
-                     android:layout_height="50dp"/>
+            <Spinner
+                android:id = "@+id/chart_second_currency"
+                android:popupBackground="@xml/background"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"/>
 
         </LinearLayout>
     </android.support.v7.widget.Toolbar>

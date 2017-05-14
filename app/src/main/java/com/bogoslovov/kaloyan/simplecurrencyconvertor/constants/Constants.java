@@ -15,6 +15,10 @@ public class Constants {
     public static final String SECOND_CURRENCY = "second-currency";
     public static final String TAG_FRAGMENT = "tag";
 
+    public static final String [] currencyTags = {"EUR","USD","JPY","BGN","CZK","DKK","GBP","HUF","PLN","RON",
+        "SEK","CHF","NOK","HRK","RUB","TRY","AUD","BRL","CAD","CNY","HKD",
+        "IDR","ILS","INR","KRW","MXN","MYR","NZD","PHP","SGD","THB","ZAR"};
+
     public final String [] currencies={"EUR Euro", "USD US dollar", "JPY Japanese yen", "BGN Bulgarian lev", "CZK Czech koruna",
         "DKK Danish krone", "GBP Pound sterling", "HUF Hungarian forint", "PLN Polish zloty", "RON Romanian leu",
         "SEK Swedish krona", "CHF Swiss franc", "NOK Norwegian krone", "HRK Croatian kuna", "RUB Russian rouble",
@@ -30,9 +34,5 @@ public class Constants {
         R.drawable.hkd,R.drawable.idr,R.drawable.ils,R.drawable.inr,R.drawable.krw,
         R.drawable.mxn,R.drawable.myr,R.drawable.nzd,R.drawable.php,
         R.drawable.sgd,R.drawable.thb,R.drawable.zar};
-
-    public final String [] currencyTags = {"EUR","USD","JPY","BGN","CZK","DKK","GBP","HUF","PLN","RON",
-        "SEK","CHF","NOK","HRK","RUB","TRY","AUD","BRL","CAD","CNY","HKD",
-        "IDR","ILS","INR","KRW","MXN","MYR","NZD","PHP","SGD","THB","ZAR"};
 
 }

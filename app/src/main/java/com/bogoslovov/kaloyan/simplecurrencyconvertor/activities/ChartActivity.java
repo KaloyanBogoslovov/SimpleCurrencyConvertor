@@ -21,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.Utils;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters.SpinnerAdapter;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbContract;
@@ -94,20 +95,22 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ChartActivity.this, MainActivity.class);
+                intent.putExtra(Constants.FIRST_CURRENCY,firstCurrency);
+                intent.putExtra(Constants.SECOND_CURRENCY, secondCurrency);
                 startActivity(intent);
             }
         });
     }
 
     private void initSpinners(){
-        Constants constants = new Constants();
-        final SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, R.layout.spinner_row,constants.currencyTags,constants.images);
+
+        final SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, R.layout.spinner_row,Constants.currencyTags,new Constants().images);
         Spinner secondCurrencySpinner = (Spinner) findViewById(R.id.chart_second_currency);
         Spinner firstCurrencySpinner = (Spinner) findViewById(R.id.chart_first_currency);
         firstCurrencySpinner.setAdapter(spinnerAdapter);
         secondCurrencySpinner.setAdapter(spinnerAdapter);
-        firstCurrencySpinner.setSelection(getObjectNumber(constants.currencyTags, firstCurrency));
-        secondCurrencySpinner.setSelection(getObjectNumber(constants.currencyTags,secondCurrency));
+        firstCurrencySpinner.setSelection(Utils.getObjectNumber(Constants.currencyTags, firstCurrency));
+        secondCurrencySpinner.setSelection(Utils.getObjectNumber(Constants.currencyTags,secondCurrency));
 
         firstCurrencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -160,16 +163,6 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
         });
     }
 
-    private int getObjectNumber(String[]currencies, String currency){
-        int number = 0;
-        for (int i=0; i<currencies.length; i++){
-            if (currencies[i].equals(currency)){
-                return i;
-            }
-        }
-        return number;
-    }
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle currencies) {
         Uri chartUri = HistoricalDataDbContract.HistoricalDataEntry.buildChartDataUri(currencies.getString(Constants.FIRST_CURRENCY),currencies.getString(Constants.SECOND_CURRENCY));
@@ -186,9 +179,9 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
             exchangeRate = new BigDecimal(data.getString(1)).divide(new BigDecimal(data.getString(0)),2,BigDecimal.ROUND_HALF_EVEN);
             exchangeRatesList.add(Float.parseFloat(exchangeRate.toPlainString()));
         }
-        for(int i = 0; i<datesList.size(); i++){
-           // System.out.println(datesList.get(i)+"  "+exchangeRatesList.get(i));
-        }
+//        for(int i = 0; i<datesList.size(); i++){
+//            System.out.println(datesList.get(i)+"  "+exchangeRatesList.get(i));
+//        }
         Collections.reverse(datesList);
         Collections.reverse(exchangeRatesList);
         initChart(datesList,exchangeRatesList);
@@ -208,6 +201,7 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
         int white  = Color.parseColor("#ffffff");
         dataSet.setColor(white);
         dataSet.setValueTextColor(white);
+        //dataSet.setValue;
 
         LineData lineData = new LineData(dataSet);
         chart.setData(lineData);

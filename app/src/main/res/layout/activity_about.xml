@@ -7,18 +7,25 @@
     android:background="@xml/background"
     android:padding="16dp">
 
-
+    <TextView
+        android:text="@string/data_source_information"
+        style="@style/AboutActivityEditTextStyle"
+        android:id="@+id/textView3" />
     <TextView
         android:text="@string/update_information"
         style="@style/AboutActivityEditTextStyle"
         android:id="@+id/textView" />
     <TextView
+        android:text="@string/update_charts_information"
+        style="@style/AboutActivityEditTextStyle"
+        android:id="@+id/textView5" />
+    <TextView
         android:text="@string/data_storage_information"
         style="@style/AboutActivityEditTextStyle"
         android:id="@+id/textView2" />
     <TextView
-        android:text="@string/data_source_information"
+        android:text="@string/ic_maker"
         style="@style/AboutActivityEditTextStyle"
-        android:id="@+id/textView3" />
+        android:id="@+id/textView4" />
 
 </LinearLayout>

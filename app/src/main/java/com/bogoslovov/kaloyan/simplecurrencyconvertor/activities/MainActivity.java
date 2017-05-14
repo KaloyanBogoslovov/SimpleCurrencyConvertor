@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.Utils;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters.SpinnerAdapter;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbContract;
@@ -52,10 +53,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static int topSpinnerSelection=0;
     private static int bottomSpinnerSelection = 1;
     private SharedPreferences sharedPreferences;
-    private EditText editTextTop;
-    private EditText editTextBottom;
-    private Spinner spinnerBottom;
-    private Spinner spinnerTop;
     private XMLParser xmlParser;
     private LoadingFragment loadingFragment;
     private Calculations calculations = new Calculations(this);
@@ -65,6 +62,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_main);
         checkForConnection(ECB_DAILY_LOADER);
         checkIfSharedPreferenceExists();
+        if (getIntent() != null && getIntent().getExtras()!=null){
+            Intent intent = getIntent();
+            String firstCurrency = intent.getStringExtra(Constants.FIRST_CURRENCY);
+            String secondCurrency = intent.getStringExtra(Constants.SECOND_CURRENCY);
+            topSpinnerSelection = Utils.getObjectNumber(Constants.currencyTags,firstCurrency);
+            bottomSpinnerSelection = Utils.getObjectNumber(Constants.currencyTags, secondCurrency);
+            System.out.println("blablabla");
+        }
         initSpinners();
         initSwapButton();
         initShowChartButton();
@@ -74,27 +79,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             getSupportActionBar().setElevation(0f);
         }
 
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("top-spinner-selection",topSpinnerSelection);
-        outState.putInt("bottom-spinner-selection",bottomSpinnerSelection);
-        outState.putString("top-edit-text-value", editTextTop.getText().toString());
-        outState.putString("bottom-edit-text-value",editTextBottom.getText().toString());
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-
-        bottomSpinnerSelection = savedInstanceState.getInt("bottom-spinner-selection");
-        topSpinnerSelection = savedInstanceState.getInt("top-spinner-selection");
-        spinnerBottom.setSelection(bottomSpinnerSelection);
-        spinnerTop.setSelection(topSpinnerSelection);
-        editTextTop.setText(savedInstanceState.getString("top-edit-text-value"));
-        editTextBottom.setText(savedInstanceState.getString("bottom-edit-text-value"));
     }
 
     private void checkForConnection(int loader){
@@ -220,8 +204,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void initEditTextFields() {
-        editTextTop = (EditText) findViewById(R.id.edit_text_top);
-        editTextBottom = (EditText) findViewById(R.id.edit_text_bottom);
+        final EditText editTextTop = (EditText) findViewById(R.id.edit_text_top);
+        final EditText editTextBottom = (EditText) findViewById(R.id.edit_text_bottom);
 
         editTextTop.setText("1");
         editTextTop.addTextChangedListener(new TextWatcher() {
@@ -268,11 +252,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private void initSpinners(){
         Constants constants = new Constants();
         final SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, R.layout.spinner_row,constants.currencies,constants.images);
-        spinnerBottom = (Spinner) findViewById(R.id.spinner_bottom);
-        spinnerTop = (Spinner) findViewById(R.id.spinner_top);
-        spinnerTop.setSelection(topSpinnerSelection);
+        Spinner spinnerBottom = (Spinner) findViewById(R.id.spinner_bottom);
+        Spinner spinnerTop = (Spinner) findViewById(R.id.spinner_top);
         spinnerTop.setAdapter(spinnerAdapter);
         spinnerBottom.setAdapter(spinnerAdapter);
+        spinnerTop.setSelection(topSpinnerSelection);
         spinnerBottom.setSelection(bottomSpinnerSelection);
         spinnerTop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
