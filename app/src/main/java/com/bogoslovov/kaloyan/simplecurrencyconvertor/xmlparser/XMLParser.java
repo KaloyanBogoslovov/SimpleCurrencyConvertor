@@ -7,11 +7,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Parsing the xml from ECB
+/** temporary test solution for parsing the xml from ECB to be replaced with XmlPullParser
  * Created by kaloqn on 5/13/17.
  */
 
-
+@Deprecated
 public class XMLParser {
 
     public List<String> parse90Days(StringBuilder stringBuilder){
