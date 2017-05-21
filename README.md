@@ -3,7 +3,9 @@
 Android app that shows the current exchange rate of the most popular currencies. 
  - The application uses data from the European central bank website, the request are made asynchronous implementing AsyncTaskLoader.
  - The application stores the newest data in a SQLite database with a content provider.
+ 
 Libraries used: OkHttp3, MPAndroidChart.
+
 
 <img src="https://cloud.githubusercontent.com/assets/22866739/26285991/4acd56ac-3e63-11e7-8504-8f45c2422be9.png" width="400px" height="225px" /> <img src="https://cloud.githubusercontent.com/assets/22866739/26285987/33c45294-3e63-11e7-86dd-c18cf8dd2152.png" width="400px" height="225px" /> 
 
