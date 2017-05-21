@@ -1,6 +1,6 @@
 <resources>
     <!-- Application title -->
-    <string name="app_name">Currency Converter</string>
+    <string name="app_name">Currencies</string>
 
     <!-- Menu items -->
     <string name="action_about">About</string>

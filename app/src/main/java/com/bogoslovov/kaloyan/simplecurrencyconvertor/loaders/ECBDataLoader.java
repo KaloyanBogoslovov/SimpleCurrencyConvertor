@@ -21,7 +21,7 @@ import okhttp3.Response;
 
 public class ECBDataLoader extends AsyncTaskLoader<DataFromServerDTO> {
 
-    String url;
+    private String url;
     public ECBDataLoader(Context context) {
         super(context);
     }
