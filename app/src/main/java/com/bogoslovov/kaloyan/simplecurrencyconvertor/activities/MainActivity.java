@@ -1,8 +1,8 @@
 package com.bogoslovov.kaloyan.simplecurrencyconvertor.activities;
 
 import android.app.LoaderManager;
-import android.content.ContentResolver;
-import android.content.ContentValues;
+import android.content.AsyncTaskLoader;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
@@ -34,13 +34,8 @@ import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbContract;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.fragments.LoadingFragment;
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBDataLoader;
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.xmlparser.XMLParser;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBDailyDataLoader;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBNinetyDaysDataLoader;
 
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.BOTTOM_SPINNER;
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.TOP_SPINNER;
@@ -54,15 +49,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static int topSpinnerSelection=0;
     private static int bottomSpinnerSelection = 1;
     private SharedPreferences sharedPreferences;
-    private XMLParser xmlParser;
     private LoadingFragment loadingFragment;
     private Calculations calculations = new Calculations(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        checkForConnection(ECB_DAILY_LOADER);
         checkIfSharedPreferenceExists();
+        checkForConnection(ECB_DAILY_LOADER);
         if (getIntent() != null && getIntent().getExtras()!=null){
             Intent intent = getIntent();
             String firstCurrency = intent.getStringExtra(Constants.FIRST_CURRENCY);
@@ -92,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()&& onlineMode()) {
-            xmlParser = new XMLParser();
             startLoader(loader);
         }else{
             if (loader==ECB_DAILY_LOADER){
@@ -131,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private void setLastUpdateDate(){
         SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
         TextView lastUpdate = (TextView) findViewById(R.id.last_update_text_view);
-        String date = "Last update: "+sharedPref.getString("date","");
+        String date = "Data accurate as of "+sharedPref.getString("date","");
         lastUpdate.setText(date);
     }
 
@@ -301,16 +294,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public Loader<DataFromServerDTO> onCreateLoader(int loaderId, Bundle args) {
 
-        ECBDataLoader loader = null;
+        AsyncTaskLoader loader = null;
         switch (loaderId){
             case ECB_DAILY_LOADER:
                 showLoading();
-                loader = new ECBDataLoader(this,Constants.ECB_DAILY_URL);
+                loader = new ECBDailyDataLoader(this,Constants.ECB_DAILY_URL,sharedPreferences);
                 break;
 
             case ECB_90_DAYS_LOADER:
                 showLoading();
-                loader = new ECBDataLoader(this,Constants.ECB_90_DAYS_URL);
+                loader = new ECBNinetyDaysDataLoader(this,Constants.ECB_90_DAYS_URL);
                 break;
         }
         return loader;
@@ -337,20 +330,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 onLoadFinishedECB90DaysLoader(data);
                 break;
         }
-
     }
 
     private void onLoadFinishedECBDailyLoader(DataFromServerDTO data){
         if(data.getResponseCode()==200) {
-            try {
-                BufferedReader br = data.getBody();
-              for (int i = 0; i < 7; i++) {
-                  br.readLine();
-              }
-              xmlParser.parseAndSaveDailyData(br,sharedPreferences);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
             setLastUpdateDate();
             dismissLoading();
@@ -365,82 +348,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private void onLoadFinishedECB90DaysLoader(DataFromServerDTO data){
         if(data.getResponseCode()==200) {
-            try {
-                BufferedReader br = data.getBody();
-                String line;
-                List<ContentValues> contentValuesList = new ArrayList<>();
-                StringBuilder stringBuilder = new StringBuilder(br.readLine());
-
-                //parse first row, because it's unique
-                List<String> firstRow = xmlParser.parse90Days(stringBuilder.delete(0,299));
-
-                //add first row
-                contentValuesList.add(toContentValues(firstRow));
-
-                //prepare stringBuilder for next row
-                stringBuilder.setLength(0);
-
-                // parse and add to the list all remaining rows
-                while((line = br.readLine()) != null){
-                    stringBuilder.append(line);
-                    List<String> dataElement = xmlParser.parse90Days(stringBuilder);
-                    contentValuesList.add(toContentValues(dataElement));
-                    stringBuilder.setLength(0);
-                }
-
-                if (contentValuesList.size()>5){
-                    saveHistoricalDataToDB(contentValuesList);
-                }
                 dismissLoading();
                 Toast.makeText(this, R.string.charts_data_updated, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(MainActivity.this, ChartActivity.class);
                 intent.putExtra(Constants.FIRST_CURRENCY,calculations.getSpinnerValue(topSpinnerValue));
                 intent.putExtra(Constants.SECOND_CURRENCY,calculations.getSpinnerValue(bottomSpinnerValue));
                 startActivity(intent);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }else{
             dismissLoading();
             Toast.makeText(this, R.string.charts_data_update_failed, Toast.LENGTH_SHORT).show();
         }
-    }
-
-
-
-    private void saveHistoricalDataToDB(List<ContentValues> contentValuesList){
-        ContentValues[] contentValuesArray = contentValuesList.toArray(new ContentValues[contentValuesList.size()]);
-
-        ContentResolver contentResolver = getContentResolver();
-        contentResolver.delete(HistoricalDataDbContract.HistoricalDataEntry.CONTENT_URI,null,null);
-        contentResolver.bulkInsert(HistoricalDataDbContract.HistoricalDataEntry.CONTENT_URI,contentValuesArray);
-        testDB(contentResolver);
-    }
-
-    private void testDB(ContentResolver contentResolver){
-        Cursor cursor = contentResolver.query(HistoricalDataDbContract.HistoricalDataEntry.CONTENT_URI,null,null,null,null);
-
-        while (cursor.moveToNext()){
-            String date = cursor.getString(cursor.getColumnIndex("DATE"));
-            String huf = cursor.getString(cursor.getColumnIndex("HUF"));
-            String zar = cursor.getString(cursor.getColumnIndex("ZAR"));
-            System.out.println("Date: "+date+" HUF: "+huf+" ZAR: "+zar);
-        }
-        cursor.close();
-    }
-
-    private ContentValues toContentValues(List<String> list){
-        ContentValues contentValues = new ContentValues();
-
-        String[] keys = {"DATE","EUR","USD","JPY","BGN","CZK","DKK","GBP","HUF","PLN","RON",
-            "SEK","CHF","NOK","HRK","RUB","TRY","AUD","BRL","CAD","CNY","HKD",
-            "IDR","ILS","INR","KRW","MXN","MYR","NZD","PHP","SGD","THB","ZAR"};
-
-        for (int i=0;i<keys.length;i++){
-            contentValues.put(keys[i],list.get(i));
-        }
-
-        return contentValues;
     }
 
     @Override

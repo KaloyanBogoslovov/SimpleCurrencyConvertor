@@ -15,7 +15,7 @@
 
     <!-- Strings related to MainActivity -->
     <string name="button_name">Swap currencies</string>
-    <string name="default_update_value">Last update: 2016-11-18</string>
+    <string name="default_update_value">Data accurate as of 2016-11-18</string>
     <string name="exchange_rates_updated">Exchange rates updated</string>
     <string name="exchange_rates_update_failed">Exchange rates not updated. Try again later</string>
     <string name="charts_data_updated">Charts data updated</string>
