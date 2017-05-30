@@ -316,12 +316,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         switch (loaderId){
             case ECB_DAILY_LOADER:
                 showLoading();
-                loader = new ECBDailyDataLoader(this,Constants.ECB_DAILY_URL,sharedPreferences);
+                loader = new ECBDailyDataLoader(this,sharedPreferences);
                 break;
 
             case ECB_90_DAYS_LOADER:
                 showLoading();
-                loader = new ECBNinetyDaysDataLoader(this,Constants.ECB_90_DAYS_URL);
+                loader = new ECBNinetyDaysDataLoader(this);
                 break;
         }
         return loader;

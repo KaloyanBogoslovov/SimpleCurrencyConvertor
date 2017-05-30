@@ -190,7 +190,7 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
 
     private void initChart(final List<String> datesList, List<Float> exchangeRatesList){
         LineChart chart = (LineChart) findViewById(R.id.chart);
-        List<Entry> entries = new ArrayList<Entry>();
+        List<Entry> entries = new ArrayList<>();
         float order = 0f;
         for (int i = 0; i< exchangeRatesList.size(); i++){
             entries.add(new Entry(order,exchangeRatesList.get(i)));

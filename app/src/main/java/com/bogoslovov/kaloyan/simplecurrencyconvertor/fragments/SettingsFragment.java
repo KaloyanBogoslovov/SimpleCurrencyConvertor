@@ -1,7 +1,6 @@
 package com.bogoslovov.kaloyan.simplecurrencyconvertor.fragments;
 
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.PreferenceFragment;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;

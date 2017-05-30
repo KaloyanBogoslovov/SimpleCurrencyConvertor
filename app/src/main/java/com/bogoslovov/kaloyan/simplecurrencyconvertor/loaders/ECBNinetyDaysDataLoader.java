@@ -4,9 +4,9 @@ import android.content.AsyncTaskLoader;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbContract;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
 
@@ -29,16 +29,11 @@ import okhttp3.Response;
  */
 
 public class ECBNinetyDaysDataLoader  extends AsyncTaskLoader<DataFromServerDTO> {
-    private String url;
     private Context context;
+
 
     public ECBNinetyDaysDataLoader(Context context) {
         super(context);
-    }
-
-    public ECBNinetyDaysDataLoader(Context context, String url) {
-        super(context);
-        this.url = url;
         this.context = context;
     }
 
@@ -54,7 +49,7 @@ public class ECBNinetyDaysDataLoader  extends AsyncTaskLoader<DataFromServerDTO>
         DataFromServerDTO data=null;
         try {
             OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder().url(url).build();
+            Request request = new Request.Builder().url(Constants.ECB_90_DAYS_URL).build();
             Response response = client.newCall(request).execute();
 
             data = new DataFromServerDTO();

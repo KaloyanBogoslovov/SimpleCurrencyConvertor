@@ -4,17 +4,16 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,15 +25,13 @@ import okhttp3.Response;
 
 public class ECBDailyDataLoader extends AsyncTaskLoader<DataFromServerDTO> {
 
-    private String url;
     private SharedPreferences sharedPreferences;
     public ECBDailyDataLoader(Context context) {
         super(context);
     }
 
-    public ECBDailyDataLoader(Context context, String url,SharedPreferences sharedPreferences) {
+    public ECBDailyDataLoader(Context context,SharedPreferences sharedPreferences) {
         super(context);
-        this.url = url;
         this.sharedPreferences = sharedPreferences;
     }
 
@@ -50,7 +47,7 @@ public class ECBDailyDataLoader extends AsyncTaskLoader<DataFromServerDTO> {
         DataFromServerDTO data=null;
         try {
             OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder().url(url).build();
+            Request request = new Request.Builder().url(Constants.ECB_DAILY_URL).build();
             Response response = client.newCall(request).execute();
 
             data = new DataFromServerDTO();
