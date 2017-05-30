@@ -48,14 +48,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static String topSpinnerValue ="";
     private static int topSpinnerSelection=0;
     private static int bottomSpinnerSelection = 1;
+    private static boolean onlineMode;
     private SharedPreferences sharedPreferences;
     private LoadingFragment loadingFragment;
     private Calculations calculations = new Calculations(this);
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkIfSharedPreferenceExists();
+        onlineMode = getDataMode();
         checkForConnection(ECB_DAILY_LOADER);
         if (getIntent() != null && getIntent().getExtras()!=null){
             Intent intent = getIntent();
@@ -76,16 +79,31 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     }
 
-    private boolean onlineMode(){
+    private boolean getDataMode(){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         boolean online = prefs.getBoolean("online-mode",true);
+
+        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+                System.out.println("sharedPreference changed");
+                if ("online-mode".equals(key)){
+                    if( prefs.getBoolean("online-mode",true)){
+                        onlineMode = true;
+                    }else{
+                        onlineMode = false;
+                    }
+                }
+            }
+        };
+
+        prefs.registerOnSharedPreferenceChangeListener(listener);
         return online;
     }
 
     private void checkForConnection(int loader){
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()&& onlineMode()) {
+        if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()&& onlineMode) {
             startLoader(loader);
         }else{
             if (loader==ECB_DAILY_LOADER){

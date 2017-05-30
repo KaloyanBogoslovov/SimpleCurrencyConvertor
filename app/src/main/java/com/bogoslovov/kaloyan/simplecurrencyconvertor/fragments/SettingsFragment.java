@@ -11,15 +11,10 @@ import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
  */
 
 public class SettingsFragment extends PreferenceFragment {
-    public static boolean onlineMode = false;
+
     @Override
     public void onCreate(final Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.settings);
-
-        CheckBoxPreference pref = (CheckBoxPreference) findPreference("online-mode");
-        onlineMode = pref.isChecked();
-        System.out.println(onlineMode);
     }
 }
