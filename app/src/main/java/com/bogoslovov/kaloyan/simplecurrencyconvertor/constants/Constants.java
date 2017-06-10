@@ -7,8 +7,6 @@ import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
  */
 
 public class Constants {
-    public static final String ECB_DAILY_URL = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
-    public static final String ECB_90_DAYS_URL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml";
     public static final String TOP_SPINNER = "top";
     public static final String BOTTOM_SPINNER="bottom";
     public static final String FIRST_CURRENCY = "first-currency";

@@ -5,8 +5,10 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.URLConstants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.db.HistoricalDataDbContract;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
 
@@ -29,8 +31,8 @@ import okhttp3.Response;
  */
 
 public class ECBNinetyDaysDataLoader  extends AsyncTaskLoader<DataFromServerDTO> {
+    private static final String TAG = ECBNinetyDaysDataLoader.class.getName();
     private Context context;
-
 
     public ECBNinetyDaysDataLoader(Context context) {
         super(context);
@@ -49,7 +51,7 @@ public class ECBNinetyDaysDataLoader  extends AsyncTaskLoader<DataFromServerDTO>
         DataFromServerDTO data=null;
         try {
             OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder().url(Constants.ECB_90_DAYS_URL).build();
+            Request request = new Request.Builder().url(URLConstants.ECB_90_DAYS_URL).build();
             Response response = client.newCall(request).execute();
 
             data = new DataFromServerDTO();
@@ -126,7 +128,7 @@ public class ECBNinetyDaysDataLoader  extends AsyncTaskLoader<DataFromServerDTO>
             String date = cursor.getString(cursor.getColumnIndex("DATE"));
             String huf = cursor.getString(cursor.getColumnIndex("HUF"));
             String zar = cursor.getString(cursor.getColumnIndex("ZAR"));
-            System.out.println("Date: "+date+" HUF: "+huf+" ZAR: "+zar);
+            Log.i(TAG, "Date: " + date + " HUF: " + huf + " ZAR: " + zar);
         }
         cursor.close();
     }

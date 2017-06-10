@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
+import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.URLConstants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -47,7 +48,7 @@ public class ECBDailyDataLoader extends AsyncTaskLoader<DataFromServerDTO> {
         DataFromServerDTO data=null;
         try {
             OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder().url(Constants.ECB_DAILY_URL).build();
+            Request request = new Request.Builder().url(URLConstants.ECB_DAILY_URL).build();
             Response response = client.newCall(request).execute();
 
             data = new DataFromServerDTO();
@@ -72,6 +73,7 @@ public class ECBDailyDataLoader extends AsyncTaskLoader<DataFromServerDTO> {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             int event = myParser.getEventType();
             int i = 0;
+
             while (event != XmlPullParser.END_DOCUMENT) {
                 String name = myParser.getName();
                 switch (event) {

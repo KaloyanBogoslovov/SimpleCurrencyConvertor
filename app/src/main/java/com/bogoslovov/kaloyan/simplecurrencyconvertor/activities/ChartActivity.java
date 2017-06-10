@@ -5,7 +5,6 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -45,9 +44,10 @@ import java.util.List;
 
 public class ChartActivity extends AppCompatActivity  implements LoaderManager.LoaderCallbacks<Cursor>{
 
-    private static final int GET_CHART_DATA = 4;
+    private static final int GET_CHART_DATA_LOADER = 4;
     private static String firstCurrency = "";
     private static String secondCurrency = "";
+    private int white;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,28 +56,28 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
             WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_chart);
 
+        white  = ContextCompat.getColor(this, R.color.white);
         Intent intent = getIntent();
         firstCurrency = intent.getStringExtra(Constants.FIRST_CURRENCY);
         secondCurrency= intent.getStringExtra(Constants.SECOND_CURRENCY);
 
-        Bundle currencies = new Bundle();
-        currencies.putString(Constants.FIRST_CURRENCY,firstCurrency);
-        currencies.putString(Constants.SECOND_CURRENCY,secondCurrency);
-        startLoader(currencies);
+        startLoader();
         setUpToolbar();
         initSpinners();
         initSwapButton();
     }
 
-
-    private void startLoader(Bundle bundle){
+    private void startLoader(){
+        Bundle currencies = new Bundle();
+        currencies.putString(Constants.FIRST_CURRENCY,firstCurrency);
+        currencies.putString(Constants.SECOND_CURRENCY,secondCurrency);
         LoaderManager loaderManager = getLoaderManager();
-        Loader<Object> passwordLoader = loaderManager.getLoader(GET_CHART_DATA);
+        Loader<Object> passwordLoader = loaderManager.getLoader(GET_CHART_DATA_LOADER);
 
         if(passwordLoader==null){
-            loaderManager.initLoader(GET_CHART_DATA,bundle,this);
+            loaderManager.initLoader(GET_CHART_DATA_LOADER,currencies,this);
         }else{
-            loaderManager.restartLoader(GET_CHART_DATA,bundle,this);
+            loaderManager.restartLoader(GET_CHART_DATA_LOADER,currencies,this);
         }
     }
 
@@ -117,16 +117,11 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 firstCurrency = spinnerAdapter.getItem(position);
-                Bundle currencies = new Bundle();
-                currencies.putString(Constants.FIRST_CURRENCY,firstCurrency);
-                currencies.putString(Constants.SECOND_CURRENCY,secondCurrency);
-                startLoader(currencies);
-                System.out.println("firstcurrecnylistener");
+                startLoader();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
@@ -134,17 +129,11 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 secondCurrency = spinnerAdapter.getItem(position);
-                Bundle currencies = new Bundle();
-                currencies.putString(Constants.FIRST_CURRENCY,firstCurrency);
-                currencies.putString(Constants.SECOND_CURRENCY,secondCurrency);
-                startLoader(currencies);
-                System.out.println("secondcurrencylistener");
-
+                startLoader();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
@@ -159,7 +148,6 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
                 int position = secondCurrencySpinner.getSelectedItemPosition();
                 secondCurrencySpinner.setSelection(firstCurrencySpinner.getSelectedItemPosition());
                 firstCurrencySpinner.setSelection(position);
-
             }
         });
     }
@@ -180,44 +168,19 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
             exchangeRate = new BigDecimal(data.getString(1)).divide(new BigDecimal(data.getString(0)),2,BigDecimal.ROUND_HALF_EVEN);
             exchangeRatesList.add(Float.parseFloat(exchangeRate.toPlainString()));
         }
-//        for(int i = 0; i<datesList.size(); i++){
-//            System.out.println(datesList.get(i)+"  "+exchangeRatesList.get(i));
-//        }
         Collections.reverse(datesList);
         Collections.reverse(exchangeRatesList);
         initChart(datesList,exchangeRatesList);
     }
 
     private void initChart(final List<String> datesList, List<Float> exchangeRatesList){
+
         LineChart chart = (LineChart) findViewById(R.id.chart);
-        List<Entry> entries = new ArrayList<>();
-        float order = 0f;
-        for (int i = 0; i< exchangeRatesList.size(); i++){
-            entries.add(new Entry(order,exchangeRatesList.get(i)));
-           // System.out.println(exchangeRatesList.get(i).floatValue());
-            order++;
-        }
-
-        LineDataSet dataSet = new LineDataSet(entries, "Label"); // add entries to dataset
-        int white  = Color.parseColor("#ffffff");
-        dataSet.setColor(white);
-        dataSet.setValueTextColor(white);
-        //dataSet.setValue;
-
-        LineData lineData = new LineData(dataSet);
-        lineData.setValueFormatter(new ValueFormatter());
-        chart.setData(lineData);
-
-        IAxisValueFormatter formatter = new IAxisValueFormatter() {
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                return datesList.get((int) value);
-            }
-        };
+        chart.setData(getLineData(exchangeRatesList));
 
         XAxis xAxis = chart.getXAxis();
-        xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
-        xAxis.setValueFormatter(formatter);
+        xAxis.setGranularity(1f);
+        xAxis.setValueFormatter(getFormatter(datesList));
         chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         chart.setDescription(null);
         chart.getLegend().setEnabled(false);
@@ -226,13 +189,37 @@ public class ChartActivity extends AppCompatActivity  implements LoaderManager.L
         chart.getXAxis().setTextColor(white);
         chart.setVisibleXRangeMaximum(16);
         chart.moveViewToX(44);
-        chart.invalidate(); // refresh
+        chart.invalidate();
     }
 
+    private LineData getLineData(List<Float> exchangeRatesList){
+        List<Entry> entries = new ArrayList<>();
+        float order = 0f;
+        for (int i = 0; i< exchangeRatesList.size(); i++){
+            entries.add(new Entry(order,exchangeRatesList.get(i)));
+            order++;
+        }
 
+        LineDataSet dataSet = new LineDataSet(entries, "Label"); // add entries to dataset
+        dataSet.setColor(white);
+        dataSet.setValueTextColor(white);
+
+        LineData lineData = new LineData(dataSet);
+        lineData.setValueFormatter(new ValueFormatter());
+
+        return lineData;
+    }
+
+    private IAxisValueFormatter getFormatter(final List<String> datesList){
+        return new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return datesList.get((int) value);
+            }
+        };
+    }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
     }
 }

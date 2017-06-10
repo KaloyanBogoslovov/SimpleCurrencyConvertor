@@ -11,10 +11,10 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +26,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.Calculations;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.R;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.Utils;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.adapters.SpinnerAdapter;
@@ -37,6 +36,10 @@ import com.bogoslovov.kaloyan.simplecurrencyconvertor.fragments.LoadingFragment;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBDailyDataLoader;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.loaders.ECBNinetyDaysDataLoader;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+import static com.bogoslovov.kaloyan.simplecurrencyconvertor.Utils.getSpinnerValue;
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.BOTTOM_SPINNER;
 import static com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants.TOP_SPINNER;
 
@@ -44,22 +47,60 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private static final int ECB_DAILY_LOADER =1;
     private static final int ECB_90_DAYS_LOADER  = 2;
-    private static String bottomSpinnerValue ="";
-    private static String topSpinnerValue ="";
+    private static final String TAG = MainActivity.class.getName();
+
+    private static String bottomSpinnerCurrency ="";
+    private static String topSpinnerCurrency ="";
     private static int topSpinnerSelection=0;
     private static int bottomSpinnerSelection = 1;
     private static boolean onlineMode;
     private SharedPreferences sharedPreferences;
     private LoadingFragment loadingFragment;
-    private Calculations calculations = new Calculations(this);
-    private SharedPreferences.OnSharedPreferenceChangeListener listener;
+    private EditText editTextTop;
+    private EditText editTextBottom;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        checkIfSharedPreferenceExists();
-        onlineMode = getDataMode();
+
+        initValues();
+        Utils.checkIfSharedPreferenceExists(sharedPreferences);
         checkForConnection(ECB_DAILY_LOADER);
+        initSpinners();
+        initSwapButton();
+        initShowChartButton();
+        initEditTextFields();
+        setWindowState();
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main_menus,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id= item.getItemId();
+
+        if(id==R.id.action_about){
+            Intent intent = new Intent (this, AboutActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        if (id==R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void initValues(){
+        sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+        onlineMode = getDataMode();
+
         if (getIntent() != null && getIntent().getExtras()!=null){
             Intent intent = getIntent();
             String firstCurrency = intent.getStringExtra(Constants.FIRST_CURRENCY);
@@ -67,36 +108,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             topSpinnerSelection = Utils.getObjectNumber(Constants.currencyTags,firstCurrency);
             bottomSpinnerSelection = Utils.getObjectNumber(Constants.currencyTags, secondCurrency);
         }
-        initSpinners();
-        initSwapButton();
-        initShowChartButton();
-        initEditTextFields();
-
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        if (getSupportActionBar()!=null) {
-            getSupportActionBar().setElevation(0f);
-        }
-
     }
 
     private boolean getDataMode(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        boolean online = prefs.getBoolean("online-mode",true);
+        boolean online = sharedPreferences.getBoolean("online-mode",true);
 
-        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-                System.out.println("sharedPreference changed");
+                Log.i(TAG,"sharedPreference changed");
                 if ("online-mode".equals(key)){
-                    if( prefs.getBoolean("online-mode",true)){
-                        onlineMode = true;
-                    }else{
-                        onlineMode = false;
-                    }
+                    onlineMode = prefs.getBoolean("online-mode",true);
                 }
             }
         };
 
-        prefs.registerOnSharedPreferenceChangeListener(listener);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
         return online;
     }
 
@@ -125,20 +151,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
     }
 
-    private void showChart(){
-        Cursor cursor = getContentResolver().query(HistoricalDataDbContract.HistoricalDataEntry.CONTENT_URI,null,null,null, null);
-        if (cursor.moveToFirst()) {
-            cursor.close();
-            Intent intent = new Intent(MainActivity.this, ChartActivity.class);
-            intent.putExtra(Constants.FIRST_CURRENCY,calculations.getSpinnerValue(topSpinnerValue));
-            intent.putExtra(Constants.SECOND_CURRENCY,calculations.getSpinnerValue(bottomSpinnerValue));
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, "You need internet connection once, so you can get the data for the charts", Toast.LENGTH_SHORT).show();
-
-        }
-    }
-
     private void setLastUpdateDate(){
         SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
         TextView lastUpdate = (TextView) findViewById(R.id.last_update_text_view);
@@ -146,70 +158,49 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         lastUpdate.setText(date);
     }
 
-    private void checkIfSharedPreferenceExists() {
-        sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-        if (!sharedPreferences.contains("EUR")) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString("EUR", "1");
-            editor.putString("JPY", "116.95");
-            editor.putString("BGN", "1.9558");
-            editor.putString("CZK", "27.035");
-            editor.putString("DKK", "7.4399");
-            editor.putString("GBP", "0.86218");
-            editor.putString("HUF", "309.49");
-            editor.putString("USD", "1.0629");
-            editor.putString("PLN", "4.4429");
-            editor.putString("RON", "4.5150");
-            editor.putString("SEK", "9.8243");
-            editor.putString("CHF", "1.0711");
-            editor.putString("NOK", "9.1038");
-            editor.putString("HRK", "7.5320");
-            editor.putString("RUB", "68.7941");
-            editor.putString("TRY", "3.5798");
-            editor.putString("AUD", "1.4376");
-            editor.putString("BRL", "3.6049");
-            editor.putString("CAD", "1.4365");
-            editor.putString("CNY", "7.3156");
-            editor.putString("HKD", "8.2450");
-            editor.putString("IDR", "14272.09");
-            editor.putString("ILS", "4.1163");
-            editor.putString("INR", "72.2170");
-            editor.putString("KRW", "1250.14");
-            editor.putString("MXN", "21.6968");
-            editor.putString("MYR", "4.6810");
-            editor.putString("NZD", "1.5073");
-            editor.putString("PHP", "52.687");
-            editor.putString("SGD", "1.5107");
-            editor.putString("THB", "37.744");
-            editor.putString("ZAR", "15.2790");
-            editor.putString("date","2016/11/18");
-            editor.apply();
-        }
-    }
-
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_main_menus,menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id= item.getItemId();
-
-        if(id==R.id.action_about){
-            Intent intent = new Intent (this, AboutActivity.class);
+    private void showChart(){
+        Cursor cursor = getContentResolver().query(HistoricalDataDbContract.HistoricalDataEntry.CONTENT_URI,null,null,null, null);
+        if (cursor.moveToFirst()) {
+            cursor.close();
+            Intent intent = new Intent(MainActivity.this, ChartActivity.class);
+            intent.putExtra(Constants.FIRST_CURRENCY,getSpinnerValue(topSpinnerCurrency));
+            intent.putExtra(Constants.SECOND_CURRENCY,getSpinnerValue(bottomSpinnerCurrency));
             startActivity(intent);
-            return true;
+        } else {
+            Toast.makeText(this, "You need internet connection once, so you can get the data for the charts", Toast.LENGTH_SHORT).show();
         }
-
-        if (id==R.id.action_settings) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
+    private void initSpinners(){
+        Constants constants = new Constants();
+        final SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, R.layout.spinner_row,constants.currencies,constants.images);
+        Spinner spinnerBottom = (Spinner) findViewById(R.id.spinner_bottom);
+        Spinner spinnerTop = (Spinner) findViewById(R.id.spinner_top);
+
+        spinnerTop.setAdapter(spinnerAdapter);
+        spinnerBottom.setAdapter(spinnerAdapter);
+
+        spinnerTop.setSelection(topSpinnerSelection);
+        spinnerBottom.setSelection(bottomSpinnerSelection);
+
+        spinnerTop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                topSpinnerCurrency = spinnerAdapter.getItem(position);
+                topSpinnerSelection = position;
+                calculate(TOP_SPINNER);
+            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
+        spinnerBottom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                bottomSpinnerCurrency = spinnerAdapter.getItem(position);
+                bottomSpinnerSelection = position;
+                calculate(TOP_SPINNER);
+            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+    }
 
     private void initSwapButton(){
         Button swapButton = (Button) findViewById(R.id.swap_button);
@@ -220,7 +211,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 int position = spinnerBottom.getSelectedItemPosition();
                 spinnerBottom.setSelection(spinnerTop.getSelectedItemPosition());
                 spinnerTop.setSelection(position);
-
             }
         });
     }
@@ -231,14 +221,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             public void onClick(View v) {
                 checkForConnection(ECB_90_DAYS_LOADER);
-
             }
         });
     }
 
     private void initEditTextFields() {
-        final EditText editTextTop = (EditText) findViewById(R.id.edit_text_top);
-        final EditText editTextBottom = (EditText) findViewById(R.id.edit_text_bottom);
+        editTextTop = (EditText) findViewById(R.id.edit_text_top);
+        editTextBottom = (EditText) findViewById(R.id.edit_text_bottom);
 
         editTextTop.setText("1");
         editTextTop.addTextChangedListener(new TextWatcher() {
@@ -248,14 +237,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
             public void afterTextChanged(Editable editable) {
                 if (editTextTop.isFocused()) {
-                    if (editTextTop.getText().toString().equals(".")){
+                    String value = editTextTop.getText().toString();
+                    if (value.equals(".")){
                         editTextTop.setText("0.");
                         editTextTop.setSelection(editTextTop.getText().length());
                     }
-                    else if(editTextTop.getText().toString().equals("")) {
+                    else if(value.equals("")) {
                         editTextBottom.setText("0.000");
                     }else{
-                        calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
+                        calculate(TOP_SPINNER);
                     }
                 }
             }
@@ -269,44 +259,25 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
             public void afterTextChanged(Editable editable) {
                 if (editTextBottom.isFocused()) {
-                    if(editTextBottom.getText().toString().equals("")) {
+                    String value = editTextBottom.getText().toString();
+                    if(value.equals("")) {
                         editTextTop.setText("0.000");
-                    }else if (editTextBottom.getText().toString().equals(".")){
+                    }else if (value.equals(".")){
                         editTextBottom.setText("0.");
                         editTextBottom.setSelection(editTextBottom.getText().length());
                     }else{
-                        calculations.calculate(BOTTOM_SPINNER, topSpinnerValue, bottomSpinnerValue);
+                        calculate(BOTTOM_SPINNER);
                     }
                 }
             }
         });
     }
 
-    private void initSpinners(){
-        Constants constants = new Constants();
-        final SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, R.layout.spinner_row,constants.currencies,constants.images);
-        Spinner spinnerBottom = (Spinner) findViewById(R.id.spinner_bottom);
-        Spinner spinnerTop = (Spinner) findViewById(R.id.spinner_top);
-        spinnerTop.setAdapter(spinnerAdapter);
-        spinnerBottom.setAdapter(spinnerAdapter);
-        spinnerTop.setSelection(topSpinnerSelection);
-        spinnerBottom.setSelection(bottomSpinnerSelection);
-        spinnerTop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
-            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                topSpinnerValue = spinnerAdapter.getItem(position);
-                topSpinnerSelection = position;
-                calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
-            }
-            public void onNothingSelected(AdapterView<?> adapterView) {}
-        });
-        spinnerBottom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
-            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                bottomSpinnerValue = spinnerAdapter.getItem(position);
-                bottomSpinnerSelection = position;
-                calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
-            }
-            public void onNothingSelected(AdapterView<?> adapterView) {}
-        });
+    private void setWindowState(){
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        if (getSupportActionBar()!=null) {
+            getSupportActionBar().setElevation(0f);
+        }
     }
 
     @Override
@@ -352,7 +323,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private void onLoadFinishedECBDailyLoader(DataFromServerDTO data){
         if(data.getResponseCode()==200) {
-            calculations.calculate(TOP_SPINNER, topSpinnerValue, bottomSpinnerValue);
+            calculate(TOP_SPINNER);
             setLastUpdateDate();
             dismissLoading();
             Toast.makeText(this, R.string.exchange_rates_updated, Toast.LENGTH_SHORT).show();
@@ -369,8 +340,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 dismissLoading();
                 Toast.makeText(this, R.string.charts_data_updated, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(MainActivity.this, ChartActivity.class);
-                intent.putExtra(Constants.FIRST_CURRENCY,calculations.getSpinnerValue(topSpinnerValue));
-                intent.putExtra(Constants.SECOND_CURRENCY,calculations.getSpinnerValue(bottomSpinnerValue));
+                intent.putExtra(Constants.FIRST_CURRENCY,getSpinnerValue(topSpinnerCurrency));
+                intent.putExtra(Constants.SECOND_CURRENCY,getSpinnerValue(bottomSpinnerCurrency));
                 startActivity(intent);
         }else{
             dismissLoading();
@@ -380,5 +351,29 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoaderReset(Loader<DataFromServerDTO> loader) {
+    }
+
+    public void calculate(String topOrBottom) {
+        String topSpinnerValue = getSpinnerValue(topSpinnerCurrency);
+        String bottomSpinnerValue = getSpinnerValue(bottomSpinnerCurrency);
+
+        if (topOrBottom.equals(TOP_SPINNER)) {
+            BigDecimal exchangeRate = getExchangeRate(topSpinnerValue, bottomSpinnerValue);
+            BigDecimal inputValue =  new BigDecimal(editTextTop.getText().toString());
+            BigDecimal result = exchangeRate.multiply(inputValue).setScale(3, RoundingMode.HALF_UP);
+            editTextBottom.setText(result.toString());
+        } else {
+            BigDecimal exchangeRate = getExchangeRate(bottomSpinnerValue, topSpinnerValue);
+            BigDecimal inputValue =  new BigDecimal(editTextBottom.getText().toString());
+            BigDecimal result = exchangeRate.multiply(inputValue).setScale(3, RoundingMode.HALF_UP);
+            editTextTop.setText(result.toString());
+        }
+    }
+
+    private BigDecimal getExchangeRate(String key, String target){
+        BigDecimal firstValue=new BigDecimal(sharedPreferences.getString(key,""));
+        BigDecimal secondValue=new BigDecimal(sharedPreferences.getString(target,""));
+        BigDecimal exchangeRate = secondValue.divide(firstValue,8,RoundingMode.HALF_UP);
+        return exchangeRate;
     }
 }
