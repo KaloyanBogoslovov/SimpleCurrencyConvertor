@@ -1,6 +1,7 @@
 # Currencies
 ## About
 Android app that shows the current exchange rate of the most popular currencies. 
+ - Using MPAndroidChart library for creating the chart.
  - The application uses data from the European central bank website, the request are made asynchronous implementing AsyncTaskLoader.
  - The application stores the newest data in a SQLite database with a content provider.
  
