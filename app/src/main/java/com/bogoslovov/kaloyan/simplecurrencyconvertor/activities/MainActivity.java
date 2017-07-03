@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private LoadingFragment loadingFragment;
     private EditText editTextTop;
     private EditText editTextBottom;
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void initValues(){
-        sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         onlineMode = getDataMode();
 
         if (getIntent() != null && getIntent().getExtras()!=null){
@@ -112,8 +114,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private boolean getDataMode(){
         boolean online = sharedPreferences.getBoolean("online-mode",true);
-
-        SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        Log.i(TAG,"hfghfghf");
+        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
                 Log.i(TAG,"sharedPreference changed");
                 if ("online-mode".equals(key)){
