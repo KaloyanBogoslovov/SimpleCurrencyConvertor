@@ -132,9 +132,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void setLastUpdateDate(){
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
         TextView lastUpdate = (TextView) findViewById(R.id.last_update_text_view);
-        String date = "Data accurate as of "+sharedPref.getString("date","");
+        String test = sharedPreferences.getString("date","");
+        String date = "Data accurate as of "+sharedPreferences.getString("date","");
         lastUpdate.setText(date);
     }
 

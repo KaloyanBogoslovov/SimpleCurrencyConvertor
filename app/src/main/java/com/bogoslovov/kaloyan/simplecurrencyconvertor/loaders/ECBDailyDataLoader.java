@@ -4,7 +4,6 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.Constants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.constants.URLConstants;
 import com.bogoslovov.kaloyan.simplecurrencyconvertor.dtos.DataFromServerDTO;
 
@@ -81,6 +80,7 @@ public class ECBDailyDataLoader extends AsyncTaskLoader<DataFromServerDTO> {
                         if (name.equals("Cube")) {
                             if (i == 1) {
                                 editor.putString("EUR", "1");
+                                String data = myParser.getAttributeValue(null, "time");
                                 editor.putString("date", myParser.getAttributeValue(null, "time"));
                             } else if (i > 1) {
                                 editor.putString(myParser.getAttributeValue(null, "currency"), myParser.getAttributeValue(null, "rate"));
