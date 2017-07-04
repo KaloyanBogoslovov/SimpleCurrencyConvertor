@@ -2,7 +2,6 @@ package com.bogoslovov.kaloyan.simplecurrencyconvertor.activities;
 
 import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
@@ -15,7 +14,6 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,7 +52,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static String topSpinnerCurrency ="";
     private static int topSpinnerSelection=0;
     private static int bottomSpinnerSelection = 1;
-    private static boolean onlineMode;
     private SharedPreferences sharedPreferences;
     private LoadingFragment loadingFragment;
     private EditText editTextTop;
@@ -101,7 +98,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private void initValues(){
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        onlineMode = getDataMode();
 
         if (getIntent() != null && getIntent().getExtras()!=null){
             Intent intent = getIntent();
@@ -112,26 +108,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
     }
 
-    private boolean getDataMode(){
-        boolean online = sharedPreferences.getBoolean("online-mode",true);
-        Log.i(TAG,"hfghfghf");
-        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-                Log.i(TAG,"sharedPreference changed");
-                if ("online-mode".equals(key)){
-                    onlineMode = prefs.getBoolean("online-mode",true);
-                }
-            }
-        };
-
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
-        return online;
-    }
-
     private void checkForConnection(int loader){
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()&& onlineMode) {
+        if (networkInfo != null && networkInfo.isConnected() &&networkInfo.isAvailable()&& sharedPreferences.getBoolean("online-mode",true)) {
             startLoader(loader);
         }else{
             if (loader==ECB_DAILY_LOADER){
