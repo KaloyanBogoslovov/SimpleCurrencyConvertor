@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private static final int ECB_DAILY_LOADER =1;
     private static final int ECB_90_DAYS_LOADER  = 2;
-    private static final String TAG = MainActivity.class.getName();
 
     private static String bottomSpinnerCurrency ="";
     private static String topSpinnerCurrency ="";
@@ -56,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private LoadingFragment loadingFragment;
     private EditText editTextTop;
     private EditText editTextBottom;
-    private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
